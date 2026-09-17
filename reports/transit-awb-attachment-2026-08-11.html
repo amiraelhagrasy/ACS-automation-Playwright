@@ -1,0 +1,608 @@
+<title>Transit AWB Attachment — Test Run Report</title>
+<style>
+  :root {
+    --bg: #f6f7fa;
+    --surface: #ffffff;
+    --surface-sunken: #eef1f6;
+    --ink: #131b2e;
+    --ink-muted: #5c6577;
+    --ink-faint: #8891a1;
+    --accent: #2e5fa3;
+    --accent-soft: #e7eef8;
+    --accent-ink: #1c3f70;
+    --good: #1c7a4e;
+    --good-soft: #e4f4ec;
+    --warn: #a85d00;
+    --warn-soft: #fbeedc;
+    --line: #e1e5ec;
+    --shadow: 0 1px 2px rgba(19, 27, 46, 0.04), 0 8px 24px rgba(19, 27, 46, 0.05);
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #0d121c;
+    --surface: #141b29;
+    --surface-sunken: #101623;
+    --ink: #e7ecf5;
+    --ink-muted: #93a0b5;
+    --ink-faint: #67728a;
+    --accent: #7aaeea;
+    --accent-soft: #1b2942;
+    --accent-ink: #bcd6f7;
+    --good: #4fcb8e;
+    --good-soft: #143327;
+    --warn: #e3a43f;
+    --warn-soft: #34260f;
+    --line: #232d42;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 32px rgba(0, 0, 0, 0.35);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0d121c;
+      --surface: #141b29;
+      --surface-sunken: #101623;
+      --ink: #e7ecf5;
+      --ink-muted: #93a0b5;
+      --ink-faint: #67728a;
+      --accent: #7aaeea;
+      --accent-soft: #1b2942;
+      --accent-ink: #bcd6f7;
+      --good: #4fcb8e;
+      --good-soft: #143327;
+      --warn: #e3a43f;
+      --warn-soft: #34260f;
+      --line: #232d42;
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 32px rgba(0, 0, 0, 0.35);
+    }
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    font-size: 15px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .display {
+    font-family: Georgia, "Iowan Old Style", "Palatino Linotype", "Noto Serif", serif;
+    letter-spacing: -0.01em;
+  }
+
+  .mono {
+    font-family: ui-monospace, "SF Mono", "Cascadia Mono", Consolas, "Liberation Mono", monospace;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .ar {
+    direction: rtl;
+    unicode-bidi: isolate;
+    font-family: "Segoe UI", Tahoma, "Noto Sans Arabic", sans-serif;
+  }
+
+  .wrap {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 56px 24px 96px;
+  }
+
+  /* ---------- Masthead ---------- */
+
+  .masthead {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 24px;
+    padding-bottom: 28px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 36px;
+    flex-wrap: wrap;
+  }
+
+  .masthead-eyebrow {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+
+  .masthead h1 {
+    font-size: 34px;
+    font-weight: 600;
+    margin: 0 0 8px;
+    text-wrap: balance;
+  }
+
+  .masthead p {
+    margin: 0;
+    color: var(--ink-muted);
+    font-size: 15px;
+    max-width: 46ch;
+  }
+
+  .result-badge {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+  }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .pill-good {
+    background: var(--good-soft);
+    color: var(--good);
+  }
+
+  .pill-good::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--good);
+  }
+
+  .result-meta {
+    font-size: 12.5px;
+    color: var(--ink-faint);
+  }
+
+  /* ---------- Run meta strip ---------- */
+
+  .meta-strip {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 48px;
+  }
+
+  .meta-cell {
+    background: var(--surface);
+    padding: 14px 16px;
+  }
+
+  .meta-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 6px;
+  }
+
+  .meta-value {
+    font-size: 14.5px;
+    font-weight: 500;
+  }
+
+  /* ---------- Section headings ---------- */
+
+  h2 {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0 0 18px;
+  }
+
+  section + section { margin-top: 48px; }
+
+  /* ---------- Pipeline ---------- */
+
+  .pipeline {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--surface);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+
+  .stage {
+    display: grid;
+    grid-template-columns: 40px 1fr auto;
+    gap: 16px;
+    align-items: start;
+    padding: 18px 20px;
+    position: relative;
+  }
+
+  .stage + .stage { border-top: 1px solid var(--line); }
+
+  .stage-num {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--accent-soft);
+    color: var(--accent-ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12.5px;
+    font-weight: 700;
+    font-family: ui-monospace, "SF Mono", Consolas, monospace;
+    margin-top: 2px;
+  }
+
+  .stage-num.warn { background: var(--warn-soft); color: var(--warn); }
+
+  .stage-title {
+    font-size: 15px;
+    font-weight: 600;
+    margin: 0 0 3px;
+  }
+
+  .stage-desc {
+    color: var(--ink-muted);
+    font-size: 13.5px;
+    margin: 0 0 10px;
+    max-width: 58ch;
+  }
+
+  .stage-data {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 18px;
+  }
+
+  .datum {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .datum-label {
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  .datum-value {
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .stage-time {
+    font-size: 12px;
+    color: var(--ink-faint);
+    white-space: nowrap;
+    margin-top: 3px;
+  }
+
+  /* ---------- Callout ---------- */
+
+  .callout {
+    border: 1px solid var(--warn);
+    border-left-width: 3px;
+    background: var(--warn-soft);
+    border-radius: 10px;
+    padding: 18px 20px;
+  }
+
+  .callout-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--warn);
+    margin-bottom: 8px;
+  }
+
+  .callout h3 {
+    font-size: 15.5px;
+    margin: 0 0 8px;
+  }
+
+  .callout p {
+    margin: 0 0 10px;
+    color: var(--ink);
+    font-size: 13.8px;
+  }
+
+  .callout p:last-child { margin-bottom: 0; }
+
+  .callout code {
+    font-family: ui-monospace, "SF Mono", Consolas, monospace;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 12.5px;
+  }
+
+  /* ---------- Coverage table ---------- */
+
+  .files {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--surface);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+
+  table { width: 100%; border-collapse: collapse; }
+
+  thead th {
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    padding: 12px 18px;
+    background: var(--surface-sunken);
+    border-bottom: 1px solid var(--line);
+  }
+
+  tbody td {
+    padding: 12px 18px;
+    font-size: 13.5px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+  }
+
+  tbody tr:last-child td { border-bottom: none; }
+
+  .file-path {
+    font-family: ui-monospace, "SF Mono", Consolas, monospace;
+    font-size: 12.5px;
+    color: var(--accent-ink);
+  }
+
+  .tag {
+    display: inline-block;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: var(--accent-soft);
+    color: var(--accent-ink);
+  }
+
+  .tag-new { background: var(--good-soft); color: var(--good); }
+
+  .table-wrap { overflow-x: auto; }
+
+  /* ---------- Footer ---------- */
+
+  footer {
+    margin-top: 56px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--ink-faint);
+  }
+
+  @media (max-width: 640px) {
+    .meta-strip { grid-template-columns: repeat(2, 1fr); }
+    .stage { grid-template-columns: 32px 1fr; }
+    .stage-time { grid-column: 2; }
+  }
+</style>
+
+<div class="wrap">
+
+  <div class="masthead">
+    <div>
+      <div class="masthead-eyebrow">ACS Automation · Playwright</div>
+      <h1 class="display">Transit AWB Attachment</h1>
+      <p>End-to-end run: create a Transit-type Import Manifest bill, wait for customs receipt, then search and attach it to a new Air Transit Manifest and submit.</p>
+    </div>
+    <div class="result-badge">
+      <span class="pill pill-good">Passed</span>
+      <span class="result-meta mono">3m 24s · 1 of 1 test</span>
+    </div>
+  </div>
+
+  <div class="meta-strip">
+    <div class="meta-cell">
+      <div class="meta-label">Spec</div>
+      <div class="meta-value file-path mono" style="font-size:12.5px;">createNewTransit.spec.ts</div>
+    </div>
+    <div class="meta-cell">
+      <div class="meta-label">Environment</div>
+      <div class="meta-value">soga.fasah.sa · b3078</div>
+    </div>
+    <div class="meta-cell">
+      <div class="meta-label">Date</div>
+      <div class="meta-value mono">2026-08-11</div>
+    </div>
+    <div class="meta-cell">
+      <div class="meta-label">Attempts</div>
+      <div class="meta-value">3 (2 fixes applied)</div>
+    </div>
+  </div>
+
+  <section>
+    <h2>Pipeline</h2>
+    <div class="pipeline">
+
+      <div class="stage">
+        <div class="stage-num">1</div>
+        <div>
+          <p class="stage-title">Create Import Manifest with a Transit-type bill</p>
+          <p class="stage-desc">Header filled, master bill added with <span class="ar">نوع بوليصة الشحن: ترانزيت</span>, house bill and warehouse completed, manifest submitted.</p>
+          <div class="stage-data">
+            <div class="datum">
+              <div class="datum-label">Reference No.</div>
+              <div class="datum-value mono">20260811485367</div>
+            </div>
+            <div class="datum">
+              <div class="datum-label">Message ID</div>
+              <div class="datum-value mono">SAU20260811268045</div>
+            </div>
+            <div class="datum">
+              <div class="datum-label">Bill No.</div>
+              <div class="datum-value mono">94357436</div>
+            </div>
+          </div>
+        </div>
+        <div class="stage-time mono">~35s</div>
+      </div>
+
+      <div class="stage">
+        <div class="stage-num">2</div>
+        <div>
+          <p class="stage-title">Poll until received</p>
+          <p class="stage-desc">Re-searched by reference every 5s until status changed from <span class="ar">تم ارسالها</span> to <span class="ar">تم استلامها</span> (Received).</p>
+          <div class="stage-data">
+            <div class="datum">
+              <div class="datum-label">Polls</div>
+              <div class="datum-value mono">7 × 5s</div>
+            </div>
+            <div class="datum">
+              <div class="datum-label">Final status</div>
+              <div class="datum-value ar">تم استلامها</div>
+            </div>
+          </div>
+        </div>
+        <div class="stage-time mono">~35s</div>
+      </div>
+
+      <div class="stage">
+        <div class="stage-num">3</div>
+        <div>
+          <p class="stage-title">Read the customs number</p>
+          <p class="stage-desc">Opened the received manifest's reference view and read <span class="ar">رقم الجمرك</span>, only populated once customs has processed it.</p>
+          <div class="stage-data">
+            <div class="datum">
+              <div class="datum-label">Customs No.</div>
+              <div class="datum-value mono">6489</div>
+            </div>
+          </div>
+        </div>
+        <div class="stage-time mono">~2s</div>
+      </div>
+
+      <div class="stage">
+        <div class="stage-num">4</div>
+        <div>
+          <p class="stage-title">Create Transit Manifest &amp; search for the bill</p>
+          <p class="stage-desc">New Transit Manifest header saved, then in step 2's <span class="ar">إضافة بوليصة شحن جوي للترانزيت</span> dialog, searched by transport company + customs number + via-port + bill number — auto-filled carrier code, bill number and import customs number.</p>
+          <div class="stage-data">
+            <div class="datum">
+              <div class="datum-label">Quantity / Weight</div>
+              <div class="datum-value mono">1 / 100</div>
+            </div>
+          </div>
+        </div>
+        <div class="stage-time mono">~20s</div>
+      </div>
+
+      <div class="stage">
+        <div class="stage-num">5</div>
+        <div>
+          <p class="stage-title">Submit the transit manifest</p>
+          <p class="stage-desc">Clicked <span class="ar">تقديم الطلب</span> and read the reference number from the resulting success alert.</p>
+          <div class="stage-data">
+            <div class="datum">
+              <div class="datum-label">Reference No.</div>
+              <div class="datum-value mono">20260811485366</div>
+            </div>
+            <div class="datum">
+              <div class="datum-label">Message ID</div>
+              <div class="datum-value mono">SAU20260811268046</div>
+            </div>
+          </div>
+        </div>
+        <div class="stage-time mono">~3s</div>
+      </div>
+
+    </div>
+  </section>
+
+  <section>
+    <h2>Found &amp; fixed</h2>
+    <div class="callout">
+      <div class="callout-label">Bug — wrong success dialog assumed</div>
+      <h3>"تقديم الطلب" doesn't show the usual confirmation dialog</h3>
+      <p><code>clickSaveAndSubmit()</code> on step 1 shows a <span class="ar">هل ترغب بتقديم المانيفست؟</span> confirmation before submitting. Step 2's <code>تقديم الطلب</code> button was assumed to behave the same way — it doesn't. It submits immediately and shows the app's standard <span class="ar">تنبيه من فسح</span> success popup directly, the same "vx1 modal show" pattern already used elsewhere in this codebase.</p>
+      <p>First run failed waiting on the wrong dialog, even though the manifest itself had already submitted successfully (reference number was visible in the failure snapshot). Replaced the wait with a dedicated <code>submitSuccessAlert</code> locator and <code>getSubmittedReferenceNumberAndClose()</code>. Re-run confirmed clean.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Files touched</h2>
+    <div class="files">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Path</th><th>Change</th><th>Purpose</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="file-path">pages/Transit Manifest/createNewTransit.ts</td>
+              <td><span class="tag">extended</span></td>
+              <td>Added step 2 dialog: search/attach bill, submit-request handling</td>
+            </tr>
+            <tr>
+              <td class="file-path">pages/Transit Manifest/viewTransit.ts</td>
+              <td><span class="tag tag-new">new</span></td>
+              <td>List search/verify/open, reused from Import Manifest</td>
+            </tr>
+            <tr>
+              <td class="file-path">pages/Import Manifest/viewImportManByRefPage.ts</td>
+              <td><span class="tag">extended</span></td>
+              <td>Added <span class="mono" style="font-size:12.5px;">getCustomsNumber()</span></td>
+            </tr>
+            <tr>
+              <td class="file-path">test-data/newTransitManifestData.ts</td>
+              <td><span class="tag tag-new">new</span></td>
+              <td>Header field values (Cairo port, transport company, via-airport)</td>
+            </tr>
+            <tr>
+              <td class="file-path">tests/Transit Manifest/createNewTransit.spec.ts</td>
+              <td><span class="tag">extended</span></td>
+              <td>3 tests: submit, save-as-draft + view, transit-AWB attachment</td>
+            </tr>
+            <tr>
+              <td class="file-path">tests/Import Manifest/newImportManTest.spec.ts</td>
+              <td><span class="tag">extended</span></td>
+              <td>Added receipt-status poll before viewing the transit bill test</td>
+            </tr>
+            <tr>
+              <td class="file-path">fixtures/testFixtures.ts</td>
+              <td><span class="tag">extended</span></td>
+              <td>Wired <span class="mono" style="font-size:12.5px;">newTransitManPage</span> / <span class="mono" style="font-size:12.5px;">viewTransitManifestPage</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span>soga.fasah.sa · b3078</span>
+    <span>Playwright · chromium · headed</span>
+  </footer>
+
+</div>

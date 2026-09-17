@@ -1,0 +1,11 @@
+node_modules/
+test-results/
+test-results-*/
+playwright-report/
+playwright-report-*/
+playwright-report.zip
+blob-report/
+*.log
+regression-results.json
+rerun-results.json
+*.last-run.json

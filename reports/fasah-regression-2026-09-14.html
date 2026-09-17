@@ -1,0 +1,757 @@
+<title>Fasah Parallel Regression</title>
+<style>
+  :root {
+    --bg: #F2F4F4;
+    --surface: #FFFFFF;
+    --surface-2: #E7ECEC;
+    --ink: #12232A;
+    --ink-dim: #4B5D63;
+    --ink-faint: #7E8D92;
+    --border: #D3DCDC;
+    --accent: #0E6B7A;
+    --accent-ink: #FFFFFF;
+    --accent-soft: #DDEEF0;
+    --pass: #1E8A5F;
+    --pass-soft: #DFF1E7;
+    --fail: #B23A2E;
+    --fail-soft: #F7E4E1;
+    --flaky: #B0761A;
+    --flaky-soft: #F5EAD6;
+    --skip: #6B7A80;
+    --skip-soft: #E7EBEC;
+    --mono-font: 'IBM Plex Mono', ui-monospace, monospace;
+    --body-font: 'IBM Plex Sans', 'IBM Plex Sans Arabic', system-ui, sans-serif;
+    --display-font: 'IBM Plex Sans', 'IBM Plex Sans Arabic', system-ui, sans-serif;
+    color-scheme: light;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0E1719;
+      --surface: #142124;
+      --surface-2: #1B2A2D;
+      --ink: #E7EEEE;
+      --ink-dim: #A9BABD;
+      --ink-faint: #7C8D91;
+      --border: #29393C;
+      --accent: #3FA9BB;
+      --accent-ink: #06181B;
+      --accent-soft: #1B3538;
+      --pass: #4CB884;
+      --pass-soft: #17342A;
+      --fail: #E17466;
+      --fail-soft: #3A211E;
+      --flaky: #E3AC53;
+      --flaky-soft: #3A2E17;
+      --skip: #96A5A9;
+      --skip-soft: #223133;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0E1719;
+    --surface: #142124;
+    --surface-2: #1B2A2D;
+    --ink: #E7EEEE;
+    --ink-dim: #A9BABD;
+    --ink-faint: #7C8D91;
+    --border: #29393C;
+    --accent: #3FA9BB;
+    --accent-ink: #06181B;
+    --accent-soft: #1B3538;
+    --pass: #4CB884;
+    --pass-soft: #17342A;
+    --fail: #E17466;
+    --fail-soft: #3A211E;
+    --flaky: #E3AC53;
+    --flaky-soft: #3A2E17;
+    --skip: #96A5A9;
+    --skip-soft: #223133;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--body-font);
+    margin: 0;
+    padding-block: 40px;
+    line-height: 1.55;
+  }
+  .wrap {
+    max-width: 980px;
+    margin: 0 auto;
+    padding-inline: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  /* ---- header / manifest strip ---- */
+  header.manifest {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .manifest-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 22px 26px 18px;
+    border-bottom: 1px dashed var(--border);
+  }
+  .manifest-top .eyebrow {
+    font-family: var(--mono-font);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 6px;
+  }
+  .manifest-top h1 {
+    font-family: var(--display-font);
+    font-size: 26px;
+    font-weight: 700;
+    margin: 0;
+    text-wrap: balance;
+  }
+  .manifest-top .meta {
+    text-align: end;
+    font-family: var(--mono-font);
+    font-size: 12px;
+    color: var(--ink-dim);
+    white-space: nowrap;
+  }
+  .manifest-top .meta div { margin-bottom: 3px; }
+
+  .stat-row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 1px;
+    background: var(--border);
+  }
+  .stat {
+    background: var(--surface);
+    padding: 16px 14px;
+    text-align: center;
+  }
+  .stat .n {
+    font-family: var(--mono-font);
+    font-size: 26px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+  .stat .l {
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    margin-top: 6px;
+  }
+  .stat.pass .n { color: var(--pass); }
+  .stat.flaky .n { color: var(--flaky); }
+  .stat.fail .n { color: var(--fail); }
+  .stat.skip .n { color: var(--skip); }
+  .stat.rate .n { color: var(--accent); }
+
+  /* ---- section shell ---- */
+  section {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .section-head h2 {
+    font-family: var(--display-font);
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0;
+  }
+  .section-head .sub {
+    font-size: 13px;
+    color: var(--ink-faint);
+    font-family: var(--mono-font);
+  }
+
+  /* ---- finding cards ---- */
+  .finding {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-inline-start: 4px solid var(--accent);
+    border-radius: 8px;
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .finding.warn { border-inline-start-color: var(--flaky); }
+  .finding .tag {
+    display: inline-flex;
+    align-self: flex-start;
+    font-family: var(--mono-font);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 3px 9px;
+    border-radius: 100px;
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+  .finding.warn .tag { background: var(--flaky-soft); color: var(--flaky); }
+  .finding h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+  }
+  .finding p { margin: 0; color: var(--ink-dim); font-size: 14px; }
+  .finding .metric {
+    font-family: var(--mono-font);
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .finding blockquote {
+    margin: 4px 0 0;
+    padding: 10px 14px;
+    background: var(--surface-2);
+    border-radius: 6px;
+    font-family: var(--mono-font);
+    font-size: 12.5px;
+    color: var(--ink-dim);
+    direction: rtl;
+    text-align: right;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  .finding .rec {
+    font-size: 13px;
+    color: var(--ink);
+    border-top: 1px dashed var(--border);
+    padding-top: 10px;
+    margin-top: 2px;
+  }
+  .finding .rec b { color: var(--accent); }
+
+  /* ---- bucket table ---- */
+  table.buckets {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    font-size: 13.5px;
+  }
+  table.buckets th, table.buckets td {
+    padding: 10px 14px;
+    text-align: start;
+    border-bottom: 1px solid var(--border);
+  }
+  table.buckets th {
+    font-family: var(--mono-font);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    font-weight: 600;
+    background: var(--surface-2);
+  }
+  table.buckets tr:last-child td { border-bottom: none; }
+  table.buckets td.num { font-family: var(--mono-font); text-align: center; font-variant-numeric: tabular-nums; }
+  table.buckets td.who { font-family: var(--mono-font); font-size: 12px; color: var(--ink-dim); }
+  .pill {
+    display: inline-block;
+    min-width: 20px;
+    padding: 1px 6px;
+    border-radius: 5px;
+    font-family: var(--mono-font);
+    font-variant-numeric: tabular-nums;
+  }
+  .pill.pass { background: var(--pass-soft); color: var(--pass); }
+  .pill.flaky { background: var(--flaky-soft); color: var(--flaky); }
+  .pill.fail { background: var(--fail-soft); color: var(--fail); }
+  .pill.skip { background: var(--skip-soft); color: var(--skip); }
+
+  /* ---- failure manifest list ---- */
+  .filter-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .filter-row button {
+    font-family: var(--mono-font);
+    font-size: 12px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--ink-dim);
+    padding: 6px 12px;
+    border-radius: 100px;
+    cursor: pointer;
+  }
+  .filter-row button.active {
+    background: var(--ink);
+    color: var(--bg);
+    border-color: var(--ink);
+  }
+  .filter-row button .c { opacity: 0.7; margin-inline-start: 4px; }
+
+  ul.roll {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--surface);
+  }
+  ul.roll li {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: 92px 1fr;
+    gap: 14px;
+    align-items: start;
+  }
+  ul.roll li:last-child { border-bottom: none; }
+  ul.roll li .status {
+    font-family: var(--mono-font);
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 3px 0;
+    text-align: center;
+    border-radius: 5px;
+    height: fit-content;
+  }
+  ul.roll li[data-status="fail"] .status { background: var(--fail-soft); color: var(--fail); }
+  ul.roll li[data-status="flaky"] .status { background: var(--flaky-soft); color: var(--flaky); }
+  ul.roll li[data-status="skip"] .status { background: var(--skip-soft); color: var(--skip); }
+  ul.roll li .name {
+    font-size: 14px;
+    font-weight: 600;
+    direction: rtl;
+    text-align: right;
+    text-wrap: balance;
+  }
+  ul.roll li .path {
+    font-family: var(--mono-font);
+    font-size: 11.5px;
+    color: var(--ink-faint);
+    margin-top: 3px;
+    direction: ltr;
+    text-align: left;
+  }
+  ul.roll li .cause {
+    display: inline-block;
+    margin-top: 6px;
+    font-family: var(--mono-font);
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 100px;
+    background: var(--surface-2);
+    color: var(--ink-dim);
+  }
+  ul.roll li[hidden] { display: none; }
+
+  footer {
+    text-align: center;
+    font-family: var(--mono-font);
+    font-size: 11.5px;
+    color: var(--ink-faint);
+    padding-top: 8px;
+  }
+
+  @media (max-width: 640px) {
+    .stat-row { grid-template-columns: repeat(3, 1fr); }
+    .manifest-top { flex-direction: column; }
+    .manifest-top .meta { text-align: start; }
+    ul.roll li { grid-template-columns: 1fr; }
+  }
+</style>
+
+<div class="wrap">
+
+  <header class="manifest">
+    <div class="manifest-top">
+      <div>
+        <p class="eyebrow">Regression Manifest · Chromium</p>
+        <h1>Fasah Parallel Regression</h1>
+      </div>
+      <div class="meta">
+        <div>2026-09-14</div>
+        <div>5 buckets · 1 worker each</div>
+        <div>~1.6h wall clock</div>
+      </div>
+    </div>
+    <div class="stat-row">
+      <div class="stat"><div class="n">73</div><div class="l">Tests run</div></div>
+      <div class="stat pass"><div class="n">37</div><div class="l">Passed clean</div></div>
+      <div class="stat flaky"><div class="n">8</div><div class="l">Flaky (passed on retry)</div></div>
+      <div class="stat fail"><div class="n">24</div><div class="l">Failed</div></div>
+      <div class="stat skip"><div class="n">4</div><div class="l">Did not run</div></div>
+    </div>
+  </header>
+
+  <section>
+    <div class="section-head">
+      <h2>What actually happened</h2>
+      <span class="sub">32 tests had ≥1 failed attempt</span>
+    </div>
+
+    <div class="finding">
+      <span class="tag">Dominant cause</span>
+      <h3>Login OTP challenge — <span class="metric">12 of 32</span> tests that ever failed (37%)</h3>
+      <p>
+        At some point during a login, the portal asked for a one-time password instead of completing sign-in.
+        <code>LoginPage.loginToApplication()</code> has no OTP step, so the test just sat there until its
+        action timeout. It didn't hit the same tests consistently — several tests passed on one attempt and hit
+        the OTP wall on the other — which points to a rate/volume trigger rather than a per-account block.
+      </p>
+      <blockquote>TimeoutError: locator.fill: Timeout 45000ms exceeded.
+Call log:
+  - waiting for locator('input[name="otp"]')</blockquote>
+      <p class="rec">
+        This run went in with <b>6 concurrent Playwright sessions</b> logging in and out all day — 5 regression
+        buckets plus a live debugging session on the same accounts, on top of dozens of earlier scratch-test
+        logins in this same session. That's very likely what triggered it. Not a code bug — re-run the 12 flagged
+        tests alone, spaced out, before treating any of them as broken.
+      </p>
+    </div>
+
+    <div class="finding warn">
+      <span class="tag">Worth a look</span>
+      <h3>Same warehouse-code field times out on fill — 4 tests, all import-manifest "waiting bill" flows</h3>
+      <p>
+        Unlike the OTP wall, this one repeats on the <span class="metric">exact same locator</span> every time,
+        across four otherwise-unrelated import-manifest tests that all add a bill while its manifest is still in
+        "قيد الانتظار". Concentrated enough that it's worth its own investigation pass, separate from the OTP
+        noise above.
+      </p>
+      <blockquote>TimeoutError: locator.fill: Timeout 45000ms exceeded.
+Call log:
+  - waiting for locator('input[test-attr^="shipping_agent_bill_create_itemandwarehouse_warehouse_code"]').last()</blockquote>
+    </div>
+
+    <div class="finding warn">
+      <span class="tag">Not triaged</span>
+      <h3>Remaining ~16 failures — mixed <code>toBeVisible</code> / assertion errors, not yet root-caused individually</h3>
+      <p>
+        These weren't walked one-by-one given how much of the run was explained by the two patterns above. Given
+        the load all five buckets put on the portal simultaneously, expect a good share to also be load-related -
+        the failure list below has the full roll so each can be re-run and judged on its own.
+      </p>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>Per-bucket breakdown</h2>
+      <span class="sub">run-regression-parallel.sh</span>
+    </div>
+    <table class="buckets">
+      <thead>
+        <tr>
+          <th>Bucket</th>
+          <th>Account(s)</th>
+          <th class="num">Passed</th>
+          <th class="num">Flaky</th>
+          <th class="num">Failed</th>
+          <th class="num">Skipped</th>
+          <th>Wall time</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>A</td>
+          <td class="who">b3078 + ffw11</td>
+          <td class="num"><span class="pill pass">6</span></td>
+          <td class="num"><span class="pill flaky">2</span></td>
+          <td class="num"><span class="pill fail">6</span></td>
+          <td class="num"><span class="pill skip">3</span></td>
+          <td>1.4h</td>
+        </tr>
+        <tr>
+          <td>B</td>
+          <td class="who">b3078 + blqur002</td>
+          <td class="num"><span class="pill pass">0</span></td>
+          <td class="num"><span class="pill flaky">0</span></td>
+          <td class="num"><span class="pill fail">1</span></td>
+          <td class="num"><span class="pill skip">0</span></td>
+          <td>&lt; 1h</td>
+        </tr>
+        <tr>
+          <td>C1</td>
+          <td class="who">b3078</td>
+          <td class="num"><span class="pill pass">10</span></td>
+          <td class="num"><span class="pill flaky">1</span></td>
+          <td class="num"><span class="pill fail">0</span></td>
+          <td class="num"><span class="pill skip">0</span></td>
+          <td>31.5m</td>
+        </tr>
+        <tr>
+          <td>C2</td>
+          <td class="who">b3078</td>
+          <td class="num"><span class="pill pass">13</span></td>
+          <td class="num"><span class="pill flaky">2</span></td>
+          <td class="num"><span class="pill fail">7</span></td>
+          <td class="num"><span class="pill skip">0</span></td>
+          <td>1.5h</td>
+        </tr>
+        <tr>
+          <td>C3</td>
+          <td class="who">b3078</td>
+          <td class="num"><span class="pill pass">8</span></td>
+          <td class="num"><span class="pill flaky">3</span></td>
+          <td class="num"><span class="pill fail">10</span></td>
+          <td class="num"><span class="pill skip">1</span></td>
+          <td>1.6h</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>Failure roll</h2>
+      <span class="sub">32 tests</span>
+    </div>
+    <div class="filter-row" id="filters">
+      <button class="active" data-f="all">All <span class="c">33</span></button>
+      <button data-f="otp">OTP-hit <span class="c">12</span></button>
+      <button data-f="warehouse">Warehouse field <span class="c">4</span></button>
+      <button data-f="other">Other <span class="c">15</span></button>
+      <button data-f="skip">Skipped (4 tests) <span class="c">2</span></button>
+    </div>
+
+    <ul class="roll" id="roll">
+      <!-- OTP-hit failed -->
+      <li data-status="fail" data-cause="otp">
+        <span class="status">Failed</span>
+        <div><div class="name">create air delivery order with invalid freight forwarder gets rejected</div>
+          <div class="path">Delivery Order\newDeliveryOrder.spec.ts:887</div>
+          <span class="cause">OTP on login</span></div>
+      </li>
+      <li data-status="fail" data-cause="otp">
+        <span class="status">Failed</span>
+        <div><div class="name">create air delivery order with freight forwarder referral and reject it</div>
+          <div class="path">Delivery Order\newDeliveryOrder.spec.ts:654</div>
+          <span class="cause">OTP on login</span></div>
+      </li>
+      <li data-status="fail" data-cause="otp">
+        <span class="status">Failed</span>
+        <div><div class="name">cancel delivery order</div>
+          <div class="path">Delivery Order\newDeliveryOrder.spec.ts:990</div>
+          <span class="cause">OTP on login</span></div>
+      </li>
+      <li data-status="fail" data-cause="otp">
+        <span class="status">Failed</span>
+        <div><div class="name">create air delivery order with freight forwarder referral and accept withdrawal request</div>
+          <div class="path">Delivery Order\newDeliveryOrder.spec.ts:309</div>
+          <span class="cause">OTP on login</span></div>
+      </li>
+      <li data-status="fail" data-cause="otp">
+        <span class="status">Failed</span>
+        <div><div class="name">Create a Bill Reservation Request for a valid bill</div>
+          <div class="path">Freight Forwarder\billReservationRequest.spec.ts:10</div>
+          <span class="cause">OTP on login</span></div>
+      </li>
+      <li data-status="fail" data-cause="otp">
+        <span class="status">Failed</span>
+        <div><div class="name">broker transfers a master bill, express-mail company links it to its manifests</div>
+          <div class="path">Import Manifest\linkMasterBillWithExpress.spec.ts:20</div>
+          <span class="cause">OTP on login</span></div>
+      </li>
+      <li data-status="fail" data-cause="otp">
+        <span class="status">Failed</span>
+        <div><div class="name">All information ECL with header, MAWB, house bill, item, and warehouse changes</div>
+          <div class="path">Import Manifest\createNewImportECL.spec.ts:1092</div>
+          <span class="cause">OTP on login</span></div>
+      </li>
+      <li data-status="fail" data-cause="otp">
+        <span class="status">Failed</span>
+        <div><div class="name">Save Manifest with more than one Bill</div>
+          <div class="path">Import Manifest\newImportManTest.spec.ts:194</div>
+          <span class="cause">OTP on login (retry)</span></div>
+      </li>
+      <li data-status="fail" data-cause="otp">
+        <span class="status">Failed</span>
+        <div><div class="name">ECL transit bill from system</div>
+          <div class="path">Transit Manifest\createNewTransitECL.spec.ts:112</div>
+          <span class="cause">OTP on login</span></div>
+      </li>
+      <li data-status="fail" data-cause="otp">
+        <span class="status">Failed</span>
+        <div><div class="name">create new transit manifest with bill that does not exist</div>
+          <div class="path">Transit Manifest\createNewTransit.spec.ts:335</div>
+          <span class="cause">OTP on login</span></div>
+      </li>
+      <li data-status="flaky" data-cause="otp">
+        <span class="status">Flaky</span>
+        <div><div class="name">create export manifest, add a bill, and submit</div>
+          <div class="path">Export Manifest\viewExportMan.spec.ts:4</div>
+          <span class="cause">OTP on first attempt, passed on retry</span></div>
+      </li>
+      <li data-status="flaky" data-cause="otp">
+        <span class="status">Flaky</span>
+        <div><div class="name">create new transit manifest and save as draft</div>
+          <div class="path">Transit Manifest\createNewTransit.spec.ts:32</div>
+          <span class="cause">OTP on first attempt, passed on retry</span></div>
+      </li>
+
+      <!-- Warehouse field -->
+      <li data-status="fail" data-cause="warehouse">
+        <span class="status">Failed</span>
+        <div><div class="name">All information ECL with adding new Waiting Normal Bill</div>
+          <div class="path">Import Manifest\createNewImportECL.spec.ts:481</div>
+          <span class="cause">warehouse_code field timeout</span></div>
+      </li>
+      <li data-status="fail" data-cause="warehouse">
+        <span class="status">Failed</span>
+        <div><div class="name">create new ECL updating two warehouses</div>
+          <div class="path">Import Manifest\createNewImportECL.spec.ts:1291</div>
+          <span class="cause">warehouse_code field timeout</span></div>
+      </li>
+      <li data-status="fail" data-cause="warehouse">
+        <span class="status">Failed</span>
+        <div><div class="name">Submit Import Manifest with one Express mail Waiting Import Bill</div>
+          <div class="path">Import Manifest\newImportManExpTest.spec.ts:83</div>
+          <span class="cause">warehouse_code field timeout</span></div>
+      </li>
+      <li data-status="fail" data-cause="warehouse">
+        <span class="status">Failed</span>
+        <div><div class="name">create new import manifest with partial arrival</div>
+          <div class="path">Import Manifest\newImportManTest.spec.ts:62</div>
+          <span class="cause">warehouse_code field timeout</span></div>
+      </li>
+
+      <!-- Other -->
+      <li data-status="fail" data-cause="other">
+        <span class="status">Failed</span>
+        <div><div class="name">create new air delivery order</div>
+          <div class="path">Delivery Order\newDeliveryOrder.spec.ts:8</div>
+          <span class="cause">not yet triaged</span></div>
+      </li>
+      <li data-status="fail" data-cause="other">
+        <span class="status">Failed</span>
+        <div><div class="name">two house air waybills (50 + 50)</div>
+          <div class="path">Freight Forwarder\createHouseAirwayBill.spec.ts:113</div>
+          <span class="cause">not yet triaged</span></div>
+      </li>
+      <li data-status="fail" data-cause="other">
+        <span class="status">Failed</span>
+        <div><div class="name">one house air waybill taking the whole bill (100)</div>
+          <div class="path">Freight Forwarder\createHouseAirwayBill.spec.ts:167</div>
+          <span class="cause">not yet triaged</span></div>
+      </li>
+      <li data-status="fail" data-cause="other">
+        <span class="status">Failed</span>
+        <div><div class="name">should create and search import manifest by reference number</div>
+          <div class="path">Import Manifest\viewImportManByRefTest.spec.ts:16</div>
+          <span class="cause">not yet triaged</span></div>
+      </li>
+      <li data-status="fail" data-cause="other">
+        <span class="status">Failed</span>
+        <div><div class="name">should edit import manifest header</div>
+          <div class="path">Import Manifest\viewImportManByRefTest.spec.ts:77</div>
+          <span class="cause">not yet triaged</span></div>
+      </li>
+      <li data-status="fail" data-cause="other">
+        <span class="status">Failed</span>
+        <div><div class="name">should wait for import manifest to be accepted then view it</div>
+          <div class="path">Import Manifest\viewImportManExp.spec.ts:80</div>
+          <span class="cause">not yet triaged</span></div>
+      </li>
+      <li data-status="fail" data-cause="other">
+        <span class="status">Failed</span>
+        <div><div class="name">Create Transit Manifest with header only</div>
+          <div class="path">Transit Manifest\createNewTransit.spec.ts:7</div>
+          <span class="cause">not yet triaged</span></div>
+      </li>
+      <li data-status="fail" data-cause="other">
+        <span class="status">Failed</span>
+        <div><div class="name">create new transit manifest with bill weight and quantity exceeding remaining balance</div>
+          <div class="path">Transit Manifest\createNewTransit.spec.ts:373</div>
+          <span class="cause">not yet triaged</span></div>
+      </li>
+      <li data-status="fail" data-cause="other">
+        <span class="status">Failed</span>
+        <div><div class="name">ECL transit bill from ZATCA</div>
+          <div class="path">Transit Manifest\createNewTransitECL.spec.ts:272</div>
+          <span class="cause">not yet triaged</span></div>
+      </li>
+      <li data-status="fail" data-cause="other">
+        <span class="status">Failed</span>
+        <div><div class="name">ECL with invalid transport company gets rejected</div>
+          <div class="path">Transit Manifest\createNewTransitECL.spec.ts:748</div>
+          <span class="cause">not yet triaged</span></div>
+      </li>
+      <li data-status="fail" data-cause="other">
+        <span class="status">Failed</span>
+        <div><div class="name">Create Air Transit Manifest ECL with Header Update and Transit Bill Add/Update/Delete</div>
+          <div class="path">Transit Manifest\createNewTransitECL.spec.ts:847</div>
+          <span class="cause">not yet triaged</span></div>
+      </li>
+      <li data-status="fail" data-cause="other">
+        <span class="status">Failed</span>
+        <div><div class="name">ECL that adds a transit bill exceeding its remaining balance gets rejected</div>
+          <div class="path">Transit Manifest\createNewTransitECL.spec.ts:1053</div>
+          <span class="cause">not yet triaged</span></div>
+      </li>
+      <li data-status="flaky" data-cause="other">
+        <span class="status">Flaky</span>
+        <div><div class="name">Add Bills to Waiting Manifest with header only</div>
+          <div class="path">Import Manifest\createNewImportECL.spec.ts:750</div>
+          <span class="cause">not yet triaged, passed on retry</span></div>
+      </li>
+      <li data-status="flaky" data-cause="other">
+        <span class="status">Flaky</span>
+        <div><div class="name">create new import manifest without AWBs</div>
+          <div class="path">Import Manifest\newImportManTest.spec.ts:7</div>
+          <span class="cause">not yet triaged, passed on retry</span></div>
+      </li>
+      <li data-status="flaky" data-cause="other">
+        <span class="status">Flaky</span>
+        <div><div class="name">create new transit manifest with a transit AWB from ZATCA</div>
+          <div class="path">Transit Manifest\createNewTransit.spec.ts:157</div>
+          <span class="cause">not yet triaged, passed on retry</span></div>
+      </li>
+      <li data-status="skip" data-cause="skip">
+        <span class="status">Skipped</span>
+        <div><div class="name">Bucket A — 3 tests skipped after an earlier test in the same serial group failed</div>
+          <div class="path">Delivery Order / Freight Forwarder specs</div>
+          <span class="cause">describe.serial cascade</span></div>
+      </li>
+      <li data-status="skip" data-cause="skip">
+        <span class="status">Skipped</span>
+        <div><div class="name">Bucket C3 — 1 test skipped after an earlier test in the same serial group failed</div>
+          <div class="path">Transit Manifest spec</div>
+          <span class="cause">describe.serial cascade</span></div>
+      </li>
+    </ul>
+  </section>
+
+  <footer>run-regression-parallel.sh · buckets A / B / C1 / C2 / C3 · playwright.regression.config.ts · slowMo 0, headless</footer>
+</div>
+
+<script>
+  const buttons = document.querySelectorAll('#filters button');
+  const items = document.querySelectorAll('#roll li');
+  buttons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      buttons.forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      const f = btn.dataset.f;
+      items.forEach((li) => {
+        li.hidden = f !== 'all' && li.dataset.cause !== f;
+      });
+    });
+  });
+</script>
