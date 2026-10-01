@@ -1,0 +1,211 @@
+{
+  "config": {
+    "argv": [
+      "C:\\Program Files\\nodejs\\node.exe",
+      "C:\\Users\\ahagrasi\\ACS Automation\\node_modules\\@playwright\\test\\cli.js",
+      "test",
+      "tests/Import Manifest/createImportManifest.spec.ts",
+      "-g",
+      "#5-8",
+      "--project=chromium",
+      "--workers=1",
+      "--reporter=list,json"
+    ],
+    "configFile": "C:\\Users\\ahagrasi\\ACS Automation\\playwright.config.ts",
+    "rootDir": "C:/Users/ahagrasi/ACS Automation/tests",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": true,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "C:/Users/ahagrasi/ACS Automation/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "firefox",
+        "name": "firefox",
+        "testDir": "C:/Users/ahagrasi/ACS Automation/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 120000
+      },
+      {
+        "outputDir": "C:/Users/ahagrasi/ACS Automation/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "C:/Users/ahagrasi/ACS Automation/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 120000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list"
+      ],
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.61.1",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "Import Manifest\\createImportManifest.spec.ts",
+      "file": "Import Manifest/createImportManifest.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Create New Import Manifest Test",
+          "file": "Import Manifest/createImportManifest.spec.ts",
+          "line": 5,
+          "column": 6,
+          "specs": [
+            {
+              "title": "#5-8 create new Import Manifest with one Completed Normal Import Bill",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 300000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 150068,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "Manifest 20260924481167 status: تم ارسالها\n"
+                        },
+                        {
+                          "text": "Manifest 20260924481167 status: تم ارسالها\n"
+                        },
+                        {
+                          "text": "Manifest 20260924481167 status: تم ارسالها\n"
+                        },
+                        {
+                          "text": "Manifest 20260924481167 status: تم ارسالها\n"
+                        },
+                        {
+                          "text": "Manifest 20260924481167 status: تم ارسالها\n"
+                        },
+                        {
+                          "text": "Manifest 20260924481167 status: تم ارسالها\n"
+                        },
+                        {
+                          "text": "Manifest 20260924481167 status: تم ارسالها\n"
+                        },
+                        {
+                          "text": "Manifest 20260924481167 status: تم ارسالها\n"
+                        },
+                        {
+                          "text": "Manifest 20260924481167 status: تم ارسالها\n"
+                        },
+                        {
+                          "text": "Manifest 20260924481167 status: تم ارسالها\n"
+                        },
+                        {
+                          "text": "Manifest 20260924481167 status: تم ارسالها\n"
+                        },
+                        {
+                          "text": "Manifest 20260924481167 status: تم استلامها\n"
+                        },
+                        {
+                          "text": "Submitted Reference Number: 20260924481167\n"
+                        },
+                        {
+                          "text": "Submitted Message Id: SAU20260924360011\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "#5 - Save Import Manifest with one Completed Normal Import Bill",
+                          "duration": 30419
+                        },
+                        {
+                          "title": "#6 - View Import Manifest with one Completed Normal Import Bill",
+                          "duration": 20433
+                        },
+                        {
+                          "title": "#7 - Edit Import Manifest with one Completed Normal Import Bill",
+                          "duration": 6525
+                        },
+                        {
+                          "title": "#8 - Submit Import Manifest with one Completed Normal  Import Bill",
+                          "duration": 2416
+                        },
+                        {
+                          "title": "Wait for manifest status to become تم استلامها",
+                          "duration": 78700
+                        }
+                      ],
+                      "startTime": "2026-09-24T05:59:25.390Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "11b45c866e1c95a61b49-6f49e75a6d901e9c0357",
+              "file": "Import Manifest/createImportManifest.spec.ts",
+              "line": 43,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-09-24T05:59:24.162Z",
+    "duration": 164321.684,
+    "expected": 1,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

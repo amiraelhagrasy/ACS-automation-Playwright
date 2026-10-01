@@ -1,7 +1,7 @@
-import { test as base, expect } from '@playwright/test';
+import { test as base, expect, Page } from '@playwright/test';
 import { LoginPage } from '../pages/LoginPage';
-import { NewImportManPage } from '../pages/Import Manifest/NewImportManPage';
-import { ViewImportManifestPage } from '../pages/Import Manifest/viewImportManByRefPage';
+import { NewImportManPage } from '../pages/Import Manifest/newImportManifest';
+import { ViewManifestPage } from '../pages/Import Manifest/viewManifestPage';
 import { CreateNewEclPage } from '../pages/Import Manifest/createNewImportEClPage';
 import { NewExportManPage } from '../pages/Export Manifest/newExportMan';
 import { ViewExportManifestPage } from '../pages/Export Manifest/viewExportMan';
@@ -21,7 +21,12 @@ import { createNewTransitManifestData } from '../test-data/newTransitManifestDat
 type Fixtures = {
     loginPage: LoginPage;
     newImportManPage: NewImportManPage;
-    viewImportManifestPage: ViewImportManifestPage;
+    //base ViewManifestPage class (NewImportManPage's parent), instantiated as its own stateless instance -
+    //kept as its own fixture name since hundreds of call sites across the test files still call
+    //viewImportManifestPage.X() and newImportManPage.Y() as if they were two different page objects. Typed as the
+    //base rather than NewImportManPage since every call site only ever uses the shared view/search/master-bill/
+    //house-bill methods, never an Import-manifest-creation-specific one:
+    viewImportManifestPage: ViewManifestPage;
     createNewEclPage: CreateNewEclPage;
     newExportManPage: NewExportManPage;
     viewExportManifestPage: ViewExportManifestPage;
@@ -43,25 +48,34 @@ type Fixtures = {
     newTransitManifestData: ReturnType<typeof createNewTransitManifestData>;
 };
 
-//overrides the built-in "page" fixture to log in once before handing the page to the test, so every test using
-//this file's `test` starts already authenticated - removes the need for a per-file beforeEach login block.
-//(storageState-based session reuse was tried to avoid repeated automated logins, but this site relies on
-//sessionStorage for auth state, which Playwright's storageState doesn't capture, so it never actually worked -
-//space out rapid consecutive runs instead to avoid triggering the site's login throttling.)
-export const test = base.extend<Fixtures>({
-    page: async ({ page }, use) => {
-        //NO_PAUSE=1 neutralises page.pause() (used in a finally block across the suite for interactive
-        //debugging) so an unattended headed run doesn't hang forever on the first failure.
-        if (process.env.NO_PAUSE) {
-            page.pause = async () => {};
-        }
+type WorkerFixtures = {
+    //logged-in once per worker process (see below) and handed out as "page" to every test that worker runs:
+    workerPage: Page;
+};
 
+//storageState-based session reuse was tried to avoid repeated automated logins, but this site relies on
+//sessionStorage for auth state, which Playwright's storageState doesn't capture, so it never actually worked.
+//This instead keeps one real browser tab open and logged in for a worker's entire lifetime, handing that same
+//tab to every test the worker runs as "page" - a worker running its tests serially (every regression bucket
+//does) now logs in once instead of once per test, which is what was actually triggering the site's login
+//throttling when several buckets hit the same account at once. Trade-off: Playwright's automatic video/trace
+//capture is tied to the built-in per-test page/context lifecycle, so it doesn't apply to this shared page -
+//only the on-failure screenshot (which is page-level, not context-lifecycle-based) still works.
+export const test = base.extend<Fixtures, WorkerFixtures>({
+    workerPage: [async ({ browser }, use) => {
+        const page = await browser.newPage();
         const loginPage = new LoginPage(page);
 
         await loginPage.navigateTo('https://soga.fasah.sa/ar/login/1.0/');
         await loginPage.loginToApplication(acsBrokerUser.username, acsBrokerUser.password, '999999');
 
         await use(page);
+
+        await page.close();
+    }, { scope: 'worker' }],
+
+    page: async ({ workerPage }, use) => {
+        await use(workerPage);
     },
 
     loginPage: async ({ page }, use) => {
@@ -73,7 +87,7 @@ export const test = base.extend<Fixtures>({
     },
 
     viewImportManifestPage: async ({ page }, use) => {
-        await use(new ViewImportManifestPage(page));
+        await use(new ViewManifestPage(page));
     },
 
     createNewEclPage: async ({ page }, use) => {

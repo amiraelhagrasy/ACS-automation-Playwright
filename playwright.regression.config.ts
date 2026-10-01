@@ -1,9 +1,9 @@
 /// <reference types="node" />
 import { defineConfig, devices } from '@playwright/test';
 
-//Regression run config: the whole suite, one worker (the tests share the same portal accounts), headless (so
-//any leftover page.pause() in a finally block is a no-op instead of hanging the run), no slowMo, one retry to
-//ride out the portal's intermittent flakiness, and a hard global cap so a stuck test can't stall the whole run.
+//Regression run config: the whole suite, one worker (the tests share the same portal accounts), headless,
+//one retry to ride out the portal's intermittent flakiness, and a hard global cap so a stuck test can't
+//stall the whole run.
 //  npx playwright test --config=playwright.regression.config.ts
 export default defineConfig({
   testDir: './tests',
@@ -21,16 +21,21 @@ export default defineConfig({
 
   reporter: [
     ['list'],
-    ['json', { outputFile: 'regression-results.json' }],
-    ['html', { outputFolder: 'playwright-report-regression', open: 'never' }],
+    // outputFile/outputFolder are read from env so run-regression-parallel.sh can point each bucket at its own
+    // files without clobbering the others - Playwright's own PLAYWRIGHT_JSON_OUTPUT_NAME only overrides this
+    // when outputFile isn't set in config at all, so setting it via env directly here is what actually works.
+    ['json', { outputFile: process.env.PLAYWRIGHT_JSON_OUTPUT_NAME || 'regression-results.json' }],
+    ['html', { outputFolder: process.env.PLAYWRIGHT_HTML_REPORT || 'playwright-report-regression', open: 'never' }],
+    ['blob', { outputDir: process.env.PLAYWRIGHT_BLOB_OUTPUT_DIR || 'blob-report' }],
   ],
 
   use: {
     headless: true,
-    //no slowMo - this run isn't watched live, and every action across a 71+ test suite is significant added
-    //wall-clock time. Documented waitForTimeout() calls in the page objects stay in place: those cover confirmed
-    //portal-side race conditions, not just pacing for a human to follow along.
-    launchOptions: { slowMo: 0 },
+    //every page object locates elements by Arabic text/labels - Chrome's default locale apparently steered the
+    //portal to its Arabic UI, but Firefox's default locale doesn't, landing on the English UI instead (confirmed
+    //2026-09-21: post-login URL was /en-US/... not /ar/...), so every Arabic locator failed to find anything.
+    //Forcing Arabic here makes the portal serve the same UI both browsers were always meant to be tested against:
+    locale: 'ar',
     //hard cap on any single action. The base config leaves this at 0 (unbounded), so a click on an element
     //that never becomes actionable hangs until the whole test times out (10-25 min) - across 71 tests that's
     //days. 45s is well above any legitimate portal interaction.
@@ -42,9 +47,12 @@ export default defineConfig({
   },
 
   projects: [
+    //Firefox, not Chrome: Fasah's anti-bot system was confirmed (2026-09-21) to block Playwright's
+    //Chromium/CDP automation fingerprint specifically - both Chrome and Edge hang on the OTP field every
+    //time, while Firefox (a different engine, different automation protocol) logs in cleanly:
     {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'], channel: 'chrome' },
+      name: 'firefox',
+      use: { ...devices['Desktop Firefox'] },
     },
   ],
 });

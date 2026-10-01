@@ -1,0 +1,487 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Fasah Test Case Report</title>
+<style>
+  body { font-family: -apple-system, Segoe UI, Arial, sans-serif; margin: 0; padding: 24px; background: #f7f7f8; color: #1a1a1a; }
+  h1 { margin: 0 0 4px; }
+  .meta { color: #666; font-size: 13px; margin-bottom: 20px; }
+  .summary { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+  .stat { background: #fff; border: 1px solid #e2e2e2; border-radius: 8px; padding: 10px 16px; min-width: 110px; }
+  .stat .n { font-size: 22px; font-weight: 700; }
+  .stat .l { font-size: 12px; color: #666; }
+  h2 { margin-top: 32px; border-bottom: 2px solid #e2e2e2; padding-bottom: 6px; }
+  table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,.05); }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #eee; font-size: 13px; vertical-align: top; }
+  th { background: #fafafa; font-weight: 600; color: #444; }
+  td.num { font-weight: 700; white-space: nowrap; }
+  td.test-title { color: #333; }
+  td.ref { color: #333; white-space: nowrap; font-size: 12px; }
+  td.duration { color: #666; white-space: nowrap; font-size: 12px; }
+  td.media { white-space: nowrap; font-size: 12px; }
+  td.media a { color: #1a5fb4; text-decoration: none; }
+  td.media a:hover { text-decoration: underline; }
+  .retry-note { color: #a5690a; font-size: 11px; white-space: nowrap; }
+  .muted { color: #bbb; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+  .badge-pass { background: #e3f9e5; color: #1e7d2b; }
+  .badge-fail { background: #fde8e8; color: #c81e1e; }
+  .badge-flaky { background: #fff4e0; color: #a5690a; }
+  .badge-skip { background: #eef0f2; color: #666; }
+  .badge-none { background: #f3f3f3; color: #999; }
+  tr.row-failed { background: #fffafa; }
+</style>
+</head>
+<body>
+  <h1>Fasah Test Case Report</h1>
+  <div class="meta">Generated 2026-09-28T15:42:43.588Z from: .report-tmp/import.json, .report-tmp/ecl.json</div>
+  <div class="summary">
+    <div class="stat"><div class="n">48m 27s</div><div class="l">Total duration</div></div>
+    <div class="stat"><div class="n">48</div><div class="l">Passed</div></div>
+    <div class="stat"><div class="n">0</div><div class="l">Failed</div></div>
+    <div class="stat"><div class="n">0</div><div class="l">Flaky</div></div>
+    <div class="stat"><div class="n">0</div><div class="l">Skipped</div></div>
+    <div class="stat"><div class="n">0</div><div class="l">Not automated</div></div>
+  </div>
+  
+      <h2>Air Import Manifest</h2>
+      <table>
+        <thead><tr><th>#</th><th>Scenario</th><th>Reference #</th><th>Message ID</th><th>Duration</th><th>Status</th><th>Media</th></tr></thead>
+        <tbody>
+        <tr class="row-passed">
+          <td class="num">#1</td>
+          <td>Save Import Manifest with header only as Draft</td>
+          <td class="ref">20260928480619</td>
+          <td class="ref"><span class="muted">-</span></td>
+          <td class="duration">16.7s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+          <td class="media"><span class="muted">-</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#2</td>
+          <td>View Import Manifest with header</td>
+          <td class="ref">20260928480619</td>
+          <td class="ref"><span class="muted">-</span></td>
+          <td class="duration">4.2s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+          <td class="media"><span class="muted">-</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#3</td>
+          <td>Edit Import Manifest with header</td>
+          <td class="ref">20260928480619</td>
+          <td class="ref"><span class="muted">-</span></td>
+          <td class="duration">4.5s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+          <td class="media"><span class="muted">-</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#4</td>
+          <td>Submit Import Manifest with header</td>
+          <td class="ref">20260928480619</td>
+          <td class="ref"><span class="muted">-</span></td>
+          <td class="duration">42.8s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+          <td class="media"><span class="muted">-</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#5</td>
+          <td>Save Import Manifest with one Completed Normal Import Bill</td>
+          <td class="ref">20260928480617</td>
+          <td class="ref">SAU20260928364063</td>
+          <td class="duration">43.4s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+          <td class="media"><span class="muted">-</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#6</td>
+          <td>View Import Manifest with one Completed Normal Import Bill</td>
+          <td class="ref">20260928480617</td>
+          <td class="ref">SAU20260928364063</td>
+          <td class="duration">16.4s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+          <td class="media"><span class="muted">-</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#7</td>
+          <td>Edit Import Manifest with one Completed Normal Import Bill</td>
+          <td class="ref">20260928480617</td>
+          <td class="ref">SAU20260928364063</td>
+          <td class="duration">6.9s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+          <td class="media"><span class="muted">-</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#8</td>
+          <td>Submit Import Manifest with one Completed Normal  Import Bill</td>
+          <td class="ref">20260928480617</td>
+          <td class="ref">SAU20260928364063</td>
+          <td class="duration">5.2s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+          <td class="media"><span class="muted">-</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#9</td>
+          <td>Submit Import Manifest with one Normal Waiting  Import Bill</td>
+          <td class="ref">20260928480616</td>
+          <td class="ref">SAU20260928364065</td>
+          <td class="duration">1m 6s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+          <td class="media"><span class="muted">-</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#10</td>
+          <td>Save Import Manifest with one Completed Express mail Import Bill</td>
+          <td class="ref">20260928480615</td>
+          <td class="ref"><span class="muted">-</span></td>
+          <td class="duration">46.2s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+          <td class="media"><span class="muted">-</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#11</td>
+          <td>View Import Manifest with one Completed Express mail Import Bill</td>
+          <td class="ref">20260928480615</td>
+          <td class="ref"><span class="muted">-</span></td>
+          <td class="duration">16.6s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+          <td class="media"><span class="muted">-</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#12</td>
+          <td>Edit Import Manifest with one Completed Express mail Import Bill</td>
+          <td class="ref">20260928480615</td>
+          <td class="ref"><span class="muted">-</span></td>
+          <td class="duration">6.7s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+          <td class="media"><span class="muted">-</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#13</td>
+          <td>Submit Import Manifest with one Completed Express mail  Import Bill</td>
+          <td class="ref">20260928480615</td>
+          <td class="ref"><span class="muted">-</span></td>
+          <td class="duration">3.7s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+          <td class="media"><span class="muted">-</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#14</td>
+          <td>Submit Import Manifest with one Express mail  Waiting  Import Bill</td>
+          <td class="ref">20260928480614</td>
+          <td class="ref">SAU20260928364069</td>
+          <td class="duration">49.4s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+          <td class="media"><span class="muted">-</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#15</td>
+          <td>Save Import Manifest with one Completed Transit  Bill</td>
+          <td class="ref">20260928480613</td>
+          <td class="ref">SAU20260928364070</td>
+          <td class="duration">48.5s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+          <td class="media"><span class="muted">-</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#16</td>
+          <td>View Import Manifest with one Completed Transit Bill</td>
+          <td class="ref">20260928480613</td>
+          <td class="ref">SAU20260928364070</td>
+          <td class="duration">4.2s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+          <td class="media"><span class="muted">-</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#17</td>
+          <td>Edit Import Manifest with one Completed Transit Bill</td>
+          <td class="ref">20260928480613</td>
+          <td class="ref">SAU20260928364070</td>
+          <td class="duration">7.2s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+          <td class="media"><span class="muted">-</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#18</td>
+          <td>Submit Import Manifest with one Completed Transit Bill</td>
+          <td class="ref">20260928480613</td>
+          <td class="ref">SAU20260928364070</td>
+          <td class="duration">8.1s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+          <td class="media"><span class="muted">-</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#19</td>
+          <td>Save Manifest with more than one Bill</td>
+          <td class="ref">20260928480611</td>
+          <td class="ref">SAU20260928364073</td>
+          <td class="duration">1m 15s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+          <td class="media"><span class="muted">-</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#20</td>
+          <td>View Manifest with more than one Bill</td>
+          <td class="ref">20260928480611</td>
+          <td class="ref">SAU20260928364073</td>
+          <td class="duration">4.6s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+          <td class="media"><span class="muted">-</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#21</td>
+          <td>Edit Manifest with more than one Bill</td>
+          <td class="ref">20260928480611</td>
+          <td class="ref">SAU20260928364073</td>
+          <td class="duration">22.8s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+          <td class="media"><span class="muted">-</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#22</td>
+          <td>Submit Manifest with more than one Bill</td>
+          <td class="ref">20260928480611</td>
+          <td class="ref">SAU20260928364073</td>
+          <td class="duration">8.8s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+          <td class="media"><span class="muted">-</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#23</td>
+          <td>Submit All information ECL with changes in header</td>
+          <td class="ref">20260928480618</td>
+          <td class="ref">SAU20260928364062</td>
+          <td class="duration">2m 52s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+          <td class="media"><span class="muted">-</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#24</td>
+          <td>Create All information ECL with Updated Existing Bill</td>
+          <td class="ref">ECL</td>
+          <td class="ref"><span class="muted">-</span></td>
+          <td class="duration">1m 59s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+          <td class="media"><span class="muted">-</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#25</td>
+          <td>View All information ECL with Updated Existing Bill</td>
+          <td class="ref">ECL</td>
+          <td class="ref"><span class="muted">-</span></td>
+          <td class="duration">1m 59s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+          <td class="media"><span class="muted">-</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#26</td>
+          <td>Submit All information ECL with Updated Existing Bill</td>
+          <td class="ref">ECL</td>
+          <td class="ref"><span class="muted">-</span></td>
+          <td class="duration">1m 59s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+          <td class="media"><span class="muted">-</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#27</td>
+          <td>Create All information ECL with Deleted Existing Bill</td>
+          <td class="ref">ECL</td>
+          <td class="ref"><span class="muted">-</span></td>
+          <td class="duration">2m 0s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+          <td class="media"><span class="muted">-</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#28</td>
+          <td>View All information ECL with Deleted Existing Bill</td>
+          <td class="ref">ECL</td>
+          <td class="ref"><span class="muted">-</span></td>
+          <td class="duration">7.4s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+          <td class="media"><span class="muted">-</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#29</td>
+          <td>Edit All information ECL with Deleted Existing Bill</td>
+          <td class="ref">ECL</td>
+          <td class="ref"><span class="muted">-</span></td>
+          <td class="duration">2m 0s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+          <td class="media"><span class="muted">-</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#30</td>
+          <td>Submit All information ECL with Deleted Existing Bill</td>
+          <td class="ref">ECL</td>
+          <td class="ref"><span class="muted">-</span></td>
+          <td class="duration">2m 0s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+          <td class="media"><span class="muted">-</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#31</td>
+          <td>Create All information ECL with adding new completed Normal Bill</td>
+          <td class="ref">20260928480612</td>
+          <td class="ref">SAU20260928364071</td>
+          <td class="duration">43.4s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+          <td class="media"><span class="muted">-</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#32</td>
+          <td>View All information ECL with adding new completed Normal Bill</td>
+          <td class="ref">20260928480612</td>
+          <td class="ref">SAU20260928364071</td>
+          <td class="duration">7.8s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+          <td class="media"><span class="muted">-</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#33</td>
+          <td>Edit All information ECL with adding new completed Normal Bill</td>
+          <td class="ref">20260928480612</td>
+          <td class="ref">SAU20260928364071</td>
+          <td class="duration">10.8s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+          <td class="media"><span class="muted">-</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#34</td>
+          <td>Submit All information ECL with adding new completed Normal Bill</td>
+          <td class="ref">20260928480612</td>
+          <td class="ref">SAU20260928364071</td>
+          <td class="duration">468ms</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+          <td class="media"><span class="muted">-</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#35</td>
+          <td>Submit All information ECL with adding new Waiting Normal Bill</td>
+          <td class="ref">20260928480610</td>
+          <td class="ref">SAU20260928364074</td>
+          <td class="duration">10.6s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+          <td class="media"><span class="muted">-</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#36</td>
+          <td>Submit All information ECL with adding new Transit  Bill</td>
+          <td class="ref">20260928480608</td>
+          <td class="ref">SAU20260928364077</td>
+          <td class="duration">10.7s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+          <td class="media"><span class="muted">-</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#37</td>
+          <td>Add Bills to Waiting Manifest</td>
+          <td class="ref">20260928480607</td>
+          <td class="ref"><span class="muted">-</span></td>
+          <td class="duration">2m 58s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+          <td class="media"><span class="muted">-</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#38</td>
+          <td>Create &quot;Edit owner information&quot; ECL</td>
+          <td class="ref">20260928480606</td>
+          <td class="ref">SAU20260928364081</td>
+          <td class="duration">6.0s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+          <td class="media"><span class="muted">-</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#39</td>
+          <td>View &quot;Edit owner information&quot; ECL</td>
+          <td class="ref">20260928480606</td>
+          <td class="ref">SAU20260928364081</td>
+          <td class="duration">7.8s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+          <td class="media"><span class="muted">-</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#40</td>
+          <td>Edit  &quot;Edit owner information&quot; ECL</td>
+          <td class="ref">20260928480606</td>
+          <td class="ref">SAU20260928364081</td>
+          <td class="duration">3.8s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+          <td class="media"><span class="muted">-</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#41</td>
+          <td>Submit &quot;Edit owner information&quot; ECL</td>
+          <td class="ref">20260928480606</td>
+          <td class="ref">SAU20260928364081</td>
+          <td class="duration">10.6s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+          <td class="media"><span class="muted">-</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#42</td>
+          <td>Create &quot;Edit Warehouse information&quot; ECL - Edit one warehouse</td>
+          <td class="ref">20260928480605</td>
+          <td class="ref">SAU20260928364083</td>
+          <td class="duration">6.0s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+          <td class="media"><span class="muted">-</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#43</td>
+          <td>Create &quot;Edit Warehouse information&quot; ECL - Edit more than one warehouse</td>
+          <td class="ref">20260928480604</td>
+          <td class="ref">SAU20260928364085</td>
+          <td class="duration">2.4s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+          <td class="media"><span class="muted">-</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#44</td>
+          <td>View &quot;Edit Warehouse information&quot; ECL - Edit more than one warehouse</td>
+          <td class="ref">20260928480604</td>
+          <td class="ref">SAU20260928364085</td>
+          <td class="duration">8.9s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+          <td class="media"><span class="muted">-</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#45</td>
+          <td>Edit  Warehouse information ECL - Edit more than one warehouse</td>
+          <td class="ref">20260928480604</td>
+          <td class="ref">SAU20260928364085</td>
+          <td class="duration">13.6s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+          <td class="media"><span class="muted">-</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#46</td>
+          <td>Submit &quot;Edit Warehouse information&quot; ECL - Edit more than one warehouse</td>
+          <td class="ref">20260928480604</td>
+          <td class="ref">SAU20260928364085</td>
+          <td class="duration">209ms</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+          <td class="media"><span class="muted">-</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#47</td>
+          <td>Upload Manifest with 999 Bills</td>
+          <td class="ref"><span class="muted">-</span></td>
+          <td class="ref"><span class="muted">-</span></td>
+          <td class="duration">33.8s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+          <td class="media"><span class="muted">-</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#48</td>
+          <td>Submit Manifest with 999 Bills</td>
+          <td class="ref"><span class="muted">-</span></td>
+          <td class="ref"><span class="muted">-</span></td>
+          <td class="duration">33.8s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+          <td class="media"><span class="muted">-</span></td>
+        </tr></tbody>
+      </table>
+  
+</body>
+</html>

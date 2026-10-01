@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test';
-import { ViewImportManifestPage } from '../Import Manifest/viewImportManByRefPage';
+import { ViewManifestPage } from '../Import Manifest/viewManifestPage';
 import { AutocompleteInput } from '../../components/AutocompleteInput';
 import { ModalComponent } from '../../components/ModalComponent';
 
@@ -25,9 +25,9 @@ export type ExportBillItemData = {
 };
 
 //the manifest list/search/edit flow is identical to the import manifest (same test-attrs), so this extends
-//ViewImportManifestPage to reuse it - only the export-specific "add bill" sub-wizard is implemented here, using its
+//ViewManifestPage to reuse it - only the export-specific "add bill" sub-wizard is implemented here, using its
 //own AutocompleteInput instance rather than reaching into the parent's private one:
-export class ViewExportManifestPage extends ViewImportManifestPage {
+export class ViewExportManifestPage extends ViewManifestPage {
     private readonly exportAutocomplete: AutocompleteInput;
     private readonly exportModal: ModalComponent;
 
@@ -146,7 +146,7 @@ export class ViewExportManifestPage extends ViewImportManifestPage {
     }
 
     //adds the filled item to the items grid within the bill-items sub-step (distinct from clickAddButton(),
-    //inherited from ViewImportManifestPage, which opens the top-level "add new bill" form):
+    //inherited from NewImportManPage, which opens the top-level "add new bill" form):
     async clickAddItemButton() {
         const addItemButton = this.page
             .getByRole('button', { name: 'إضافة' })
@@ -166,7 +166,7 @@ export class ViewExportManifestPage extends ViewImportManifestPage {
 
         await this.fillExportBillItemForm(billItemData);
         await this.clickAddItemButton();
-        await this.clickSaveButton();
+        await this.clickSubmitButton();
     }
 
     //clicks "تعديل" on the last visible export bill row (the flat bills list has no master/house bill hierarchy

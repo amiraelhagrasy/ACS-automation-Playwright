@@ -3,7 +3,7 @@ import { ViewTransitManifestPage } from './viewTransit';
 //page object for the ECL (خطاب تعديل إلكتروني) flow on an accepted transit manifest - mirrors
 //CreateNewExportEclPage, reusing the same generic button-text/data-i18n based methods since the ECL screens
 //themselves aren't manifest-type-specific. Extends ViewTransitManifestPage for the shared search/status/view
-//methods further up the chain (ViewImportManifestPage). Like export (and unlike import), transit manifests only
+//methods further up the chain (NewImportManPage). Like export (and unlike import), transit manifests only
 //have one ECL type - clicking "إنشاء خطاب تعديل إلكتروني" lands directly on the header edit screen, no ECL type
 //selection step:
 export class CreateNewTransitEclPage extends ViewTransitManifestPage {

@@ -7,7 +7,27 @@
     "test": "tests"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "playwright test",
+    "regression": "bash run-regression-parallel.sh",
+    "regression:serial": "playwright test --config=playwright.regression.config.ts",
+    "test:module": "node scripts/run-module.js",
+    "test:modules": "node scripts/run-module.js all",
+    "test:import": "node scripts/run-module.js import",
+    "test:export": "node scripts/run-module.js export",
+    "test:transit": "node scripts/run-module.js transit",
+    "test:delivery": "node scripts/run-module.js delivery",
+    "test:ffw": "node scripts/run-module.js ffw",
+    "test:login": "node scripts/run-module.js login",
+    "report:import": "playwright show-report playwright-report-import",
+    "report:export": "playwright show-report playwright-report-export",
+    "report:transit": "playwright show-report playwright-report-transit",
+    "report:delivery": "playwright show-report playwright-report-delivery",
+    "report:ffw": "playwright show-report playwright-report-ffw",
+    "report:login": "playwright show-report playwright-report-login",
+    "rerun":"playwright test --config=playwright.rerun.config.ts",
+    "report": "playwright show-report",
+    "report:regression": "playwright show-report playwright-report-regression",
+    "report:testcases": "node scripts/generate-test-case-report.js regression-results.json -o reports/test-case-report.html"
   },
   "keywords": [],
   "author": "",

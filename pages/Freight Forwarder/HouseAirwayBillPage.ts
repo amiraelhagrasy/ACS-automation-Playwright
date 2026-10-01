@@ -68,18 +68,45 @@ export class HouseAirwayBillPage {
         await this.houseBillsMenu.click();
     }
 
+    //confirmed live, 2026-10-01: this click wasn't verified to actually take effect - caught via screenshot still
+    //sitting on "البوالص المكتملة" (a leftover tab selection from a PRECEDING step, e.g. verifyBillInCompleted())
+    //with aria-selected still on that tab, not this one. Not the same class of issue as the already-documented
+    //Transit Manifest create-form flakiness (investigated separately, confirmed not fixable by waiting longer) -
+    //this is a plain unverified-click bug, fixed the same way as the other tab-switch fixes elsewhere in this
+    //codebase: retry until aria-selected actually confirms the switch:
     async openPendingBillsTab(): Promise<void> {
         await this.waitForPageIdle();
         await expect(this.pendingBillsTab).toBeVisible({ timeout: 15_000 });
-        await this.pendingBillsTab.click();
+
+        for (let attempt = 1; attempt <= 3; attempt++) {
+            await this.pendingBillsTab.click();
+            const selected = await this.pendingBillsTab
+                .evaluate((el) => el.getAttribute('aria-selected') === 'true')
+                .catch(() => false);
+            if (selected) {
+                return;
+            }
+            await this.page.waitForTimeout(500);
+        }
     }
 
     //"بوالص قيد التقسيم" - where a bill moves once at least one house air waybill has been started against it
-    //(it leaves "بوالص قيد الانتظار"). Used to add a further house bill to the same master bill.
+    //(it leaves "بوالص قيد الانتظار"). Used to add a further house bill to the same master bill. Same
+    //unverified-click fix as openPendingBillsTab() above:
     async openSplittingBillsTab(): Promise<void> {
         await this.waitForPageIdle();
         await expect(this.splittingBillsTab).toBeVisible({ timeout: 15_000 });
-        await this.splittingBillsTab.click();
+
+        for (let attempt = 1; attempt <= 3; attempt++) {
+            await this.splittingBillsTab.click();
+            const selected = await this.splittingBillsTab
+                .evaluate((el) => el.getAttribute('aria-selected') === 'true')
+                .catch(() => false);
+            if (selected) {
+                return;
+            }
+            await this.page.waitForTimeout(500);
+        }
     }
 
     //the list table live-filters on the generic "بحث" search field, same as every other list page here.
@@ -87,11 +114,29 @@ export class HouseAirwayBillPage {
     async openBillByNumber(billNo: string): Promise<void> {
         await this.waitForPageIdle();
 
-        const activePanel = this.page.locator('.tab-pane.active, [role="tabpanel"]:visible').last();
+        //confirmed live, 2026-09-30: the previous ".tab-pane.active, [role=\"tabpanel\"]:visible" OR-selector can
+        //match a different, unrelated visible [role="tabpanel"] elsewhere on the page (or one still mid-transition
+        //during a tab switch) instead of this tab's own pane - the click intercepted on the pane's own subtree,
+        //then the field reported "not visible" shortly after. Same bug/fix already applied to
+        //verifyBillInCompleted() above - scope strictly to ".tab-pane.active":
+        const activePanel = this.page.locator('.tab-pane.active').last();
         const searchField = activePanel.getByPlaceholder('بحث').and(this.page.locator(':visible')).first();
 
         if (await searchField.count()) {
-            await searchField.click();
+            //confirmed live, 2026-09-30: even with the correct element resolved (confirmed via screenshot showing
+            //the right tab active with the field genuinely visible and populated), the click can still
+            //intermittently fail right after a tab switch - a transient settle/render timing issue, not a wrong-
+            //element match this time. Retry instead of failing on the first attempt:
+            let clicked = false;
+            for (let attempt = 1; attempt <= 3 && !clicked; attempt++) {
+                clicked = await searchField
+                    .click({ timeout: 15_000 })
+                    .then(() => true)
+                    .catch(() => false);
+            }
+            if (!clicked) {
+                await searchField.click();
+            }
             await searchField.fill('');
             await this.page.keyboard.type(billNo, { delay: 100 });
             await this.waitForPageIdle();
@@ -105,10 +150,27 @@ export class HouseAirwayBillPage {
     async clickCreateHouseAirwayBill(): Promise<void> {
         await this.waitForPageIdle();
         await expect(this.createHouseAirwayBillButton).toBeVisible({ timeout: 15_000 });
-        await this.createHouseAirwayBillButton.click({ timeout: 15_000 });
-        //the wizard renders inside a modal that animates in - give its fields a beat to bind before filling,
-        //same fixed-wait idiom used after other SPA navigations in this codebase.
-        await this.page.waitForTimeout(1_500);
+
+        //confirmed live, 2026-10-01: the click can report success with no error, yet the wizard's #bill-create-
+        //form never actually opens - the button stays sitting there untouched on screen (confirmed via
+        //screenshot). Retry the click itself (checking whether the form shows up) instead of assuming a single
+        //click + fixed wait is enough, same pattern already proven elsewhere in this file:
+        for (let attempt = 1; attempt <= 3; attempt++) {
+            await this.createHouseAirwayBillButton.click({ timeout: 15_000 });
+            //the wizard renders inside a modal that animates in - give its fields a beat to bind before checking,
+            //same fixed-wait idiom used after other SPA navigations in this codebase.
+            await this.page.waitForTimeout(1_500);
+
+            const formAppeared = await this.page
+                .locator('#bill-create-form')
+                .waitFor({ state: 'visible', timeout: 8_000 })
+                .then(() => true)
+                .catch(() => false);
+
+            if (formAppeared) {
+                return;
+            }
+        }
     }
 
     //navigates to the bill (on the given tab) and opens a fresh house bill wizard, retrying when the portal
@@ -197,106 +259,6 @@ export class HouseAirwayBillPage {
         await form.locator('input[name="shipping_agent:freight_forwarder.shipper_address"]').fill(data.shipperAddress);
     }
 
-    //reads any visible fasah error/alert text on the page (danger alerts, alert bodies, confirm/message modals).
-    async readVisibleAlerts(): Promise<string> {
-        return (
-            await this.page
-                .locator(
-                    '.fasah-alert-danger, .fasah-alert-body, .modal-body p, .modal-body .fasah-alert, .invalid-feedback'
-                )
-                .and(this.page.locator(':visible'))
-                .allTextContents()
-                .catch(() => [])
-        )
-            .map((t) => t.trim())
-            .filter(Boolean)
-            .join(' | ');
-    }
-
-    //runs the full 3-step wizard for a house bill that is expected to be REJECTED because its amount plus the
-    //house bills already on the master bill exceeds the master bill's total. Returns the rejection text and the
-    //stage it was caught at ('save-and-continue' | 'add-item' | 'add-warehouse' | 'final-save' | 'submit' |
-    //'none'). Throws if nothing rejected it anywhere.
-    async createHouseBillExpectingReject(
-        header: HouseAirwayBillData,
-        amounts: { item: HouseBillItemData; warehouse: HouseBillWarehouseData }
-    ): Promise<{ stage: string; text: string }> {
-        const check = async (stage: string): Promise<{ stage: string; text: string } | null> => {
-            const text = await this.readVisibleAlerts();
-            const stillOnHeader = await this.page
-                .locator('#bill-create-form')
-                .isVisible()
-                .catch(() => false);
-            const onItems = await this.page.locator('#bill-items-create-form').isVisible().catch(() => false);
-            console.log(`REJECT CHECK @ ${stage} - header:${stillOnHeader} items:${onItems} | ${text}`);
-            if (text) {
-                await this.modal.closeAllIfPresent();
-                return { stage, text };
-            }
-            return null;
-        };
-
-        await this.fillHouseBillHeader(header);
-        await this.clickSaveAndContinue();
-        let hit = await check('save-and-continue');
-        if (hit) return hit;
-
-        await this.fillHouseBillItem(amounts.item);
-        await this.clickAddRow();
-        hit = await check('add-item');
-        if (hit) return hit;
-
-        await this.clickSaveAndContinue();
-        hit = await check('save-and-continue-2');
-        if (hit) return hit;
-
-        await this.fillHouseBillWarehouse(amounts.warehouse);
-        await this.clickAddRow();
-        hit = await check('add-warehouse');
-        if (hit) return hit;
-
-        await this.clickSave();
-        hit = await check('final-save');
-        if (hit) return hit;
-
-        // last gate: تقديم الطلب - do it inline so we can read WHATEVER alert comes back (success or error)
-        await this.waitForPageIdle();
-        await this.dismissLingeringBackdrop();
-        const submitLink = this.page.locator('#submitHouseBills').and(this.page.locator(':visible')).last();
-        await expect(submitLink).toBeVisible({ timeout: 15_000 });
-        await submitLink.scrollIntoViewIfNeeded();
-        await submitLink.click({ timeout: 15_000 });
-
-        const confirmYes = this.page
-            .locator('.fasah-confirm-modal button[data-method="نعم"]')
-            .and(this.page.locator(':visible'))
-            .last();
-        await expect(confirmYes).toBeVisible({ timeout: 15_000 });
-        await confirmYes.click({ timeout: 15_000 });
-        await this.page.waitForTimeout(3_000);
-
-        const submitAlert = (
-            await this.page
-                .locator('.modal-content, .fasah-alert')
-                .and(this.page.locator(':visible'))
-                .allTextContents()
-                .catch(() => [])
-        )
-            .map((t) => t.replace(/\s+/g, ' ').trim())
-            .filter(Boolean)
-            .join(' | ');
-        console.log(`REJECT CHECK @ submit(inline) - alert: ${submitAlert}`);
-        await this.modal.closeAllIfPresent();
-
-        if (submitAlert && !submitAlert.includes('تم ارسال طلب تعيين البوالص الفرعية بنجاح')) {
-            return { stage: 'submit', text: submitAlert };
-        }
-
-        throw new Error(
-            `Expected the over-allocated house bill to be rejected, but nothing blocked it (submit alert: "${submitAlert}")`
-        );
-    }
-
     //step 2 of the wizard - #bill-items-create-form
     async fillHouseBillItem(data: HouseBillItemData): Promise<void> {
         const form = this.page.locator('#bill-items-create-form');
@@ -350,7 +312,14 @@ export class HouseAirwayBillPage {
         await this.page.waitForTimeout(800);
     }
 
-    //wizard nav: "حفظ واستمرار" (the shared .wizard-action-buttons bar - only one is on screen at a time)
+    //wizard nav: "حفظ واستمرار" (the shared .wizard-action-buttons bar - only one is on screen at a time).
+    //confirmed live, 2026-09-30: tried scoping this to .tab-pane.wizard-step.active (matching clickAddRow()'s own
+    //pattern) on a theory that an unscoped query could click the wrong button - that broke it outright ("element
+    //not found"), since this button is genuinely NOT inside .tab-pane.wizard-step.active at all: it lives in a
+    //separate, shared action bar outside the step panes (confirmed via a live accessibility snapshot showing
+    //"السابق"/"حفظ واستمرار" present on the page but not matched by the scoped locator). Reverted to the
+    //original unscoped page query - the real bug behind the "next form never appears" failure was elsewhere, not
+    //here:
     async clickSaveAndContinue(): Promise<void> {
         await this.waitForPageIdle();
         await this.dismissLingeringBackdrop();
@@ -437,13 +406,30 @@ export class HouseAirwayBillPage {
         await tab.click();
         await this.waitForPageIdle();
 
-        const activePanel = this.page.locator('.tab-pane.active, [role="tabpanel"]:visible').last();
+        //confirmed live, 2026-09-30: the previous ".tab-pane.active, [role=\"tabpanel\"]:visible" selector's OR
+        //alternative could match a DIFFERENT, unrelated visible [role="tabpanel"] elsewhere on the page, and
+        //.last() then grabbed that one instead of this tab's own pane (the screenshot showed the correct tab
+        //active with a visible search box, yet the locator reported the field "not visible" - a wrong-element
+        //match, not a rendering delay). Scope strictly to the Bootstrap ".tab-pane.active" marker this app
+        //already uses consistently elsewhere instead of the ambiguous OR:
+        const activePanel = this.page.locator('.tab-pane.active').last();
         const searchField = activePanel.getByPlaceholder('بحث').and(this.page.locator(':visible')).first();
         const row = activePanel.locator('tbody tr').filter({ hasText: billNo }).first();
 
         while (true) {
             if (await searchField.count()) {
-                await searchField.click();
+                //confirmed live, 2026-10-01: same transient "not stable"/"not visible" click instability already
+                //seen and fixed in openBillByNumber() above - retry instead of failing on the first attempt:
+                let clicked = false;
+                for (let attempt = 1; attempt <= 3 && !clicked; attempt++) {
+                    clicked = await searchField
+                        .click({ timeout: 15_000 })
+                        .then(() => true)
+                        .catch(() => false);
+                }
+                if (!clicked) {
+                    await searchField.click();
+                }
                 await searchField.fill('');
                 await this.page.keyboard.type(requestNumber, { delay: 100 });
                 await this.waitForPageIdle();
@@ -470,7 +456,8 @@ export class HouseAirwayBillPage {
         }
     }
 
-    //wizard nav: the final "حفظ" (done)
+    //wizard nav: the final "حفظ" (done). Same shared action-bar button as clickSaveAndContinue() above - see that
+    //method's comment for why this stays unscoped rather than nested under .tab-pane.wizard-step.active:
     async clickSave(): Promise<void> {
         await this.waitForPageIdle();
         await this.dismissLingeringBackdrop();

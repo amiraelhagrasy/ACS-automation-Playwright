@@ -3,7 +3,7 @@ import { ViewExportManifestPage } from './viewExportMan';
 //page object for the ECL (خطاب تعديل إلكتروني) flow on an accepted export manifest - mirrors CreateNewEclPage
 //(the import equivalent), reusing the same generic button-text/data-i18n based methods since the ECL screens
 //themselves aren't import/export-specific. Extends ViewExportManifestPage for the export bill-adding methods and
-//the shared search/status/view methods further up the chain (ViewImportManifestPage):
+//the shared search/status/view methods further up the chain (NewImportManPage):
 export class CreateNewExportEclPage extends ViewExportManifestPage {
 
     // ---- 1) create the ECL ----

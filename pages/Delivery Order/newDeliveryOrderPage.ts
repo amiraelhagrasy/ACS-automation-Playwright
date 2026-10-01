@@ -45,6 +45,11 @@ export class NewDeliveryOrderPage {
   private readonly referToFreightForwarderCheckbox: Locator;
   private readonly freightForwarderInput: Locator;
 
+  //remembers what fillDeliveryOrderForm() last filled, so clickEditButton() can explicitly re-fill these on a
+  //reopened draft instead of trusting the portal's own pre-fill (see clickEditButton()'s own comment):
+  private lastFilledTransportCompany: string | null = null;
+  private lastFilledBillNo: string | null = null;
+
   private readonly saveButton: Locator;
   private readonly submitButton: Locator;
   //only present once an existing (draft) delivery order has been opened - reopens it as an editable form, which
@@ -124,9 +129,12 @@ export class NewDeliveryOrderPage {
     this.historyDetailsButton = page.getByRole('button', { name: 'التفاصيل' }).and(page.locator(':visible')).last();
   }
 
-  //closes any blocking popup (e.g. a leftover success toast from a prior حفظ/تقديم الطلب) if present:
+  //closes any blocking popup (e.g. a leftover success toast from a prior حفظ/تقديم الطلب) if present. Delegates to
+  //closeAllIfPresent() rather than a single closeIfPresent(): confirmed live (2026-09-28) that the license-expiry
+  //warning and the newer "الشروط والأحكام" terms popup can be stacked together right after a fresh login, and a
+  //single-shot close leaves one of them still blocking:
   async closeBlockingModalIfPresent(): Promise<void> {
-    return this.modal.closeIfPresent();
+    return this.modal.closeAllIfPresent();
   }
 
   //waits for the "nprogress-busy" class (set while an XHR/route transition is in flight) to clear, same idiom
@@ -162,6 +170,12 @@ export class NewDeliveryOrderPage {
   }
 
   async clickCreateDeliveryOrderButton(): Promise<void> {
+    //the manifest status query flips to تم استلامها slightly before the DEO creation endpoint's own backing
+    //data catches up (see clickSaveButton()'s "المانيفست غير موجود" retry) - every test reaches this call right
+    //after that status wait, so a short buffer here (on top of, not instead of, that retry) cuts down how often
+    //the retry is needed at all:
+    await this.page.waitForTimeout(3_000);
+
     await expect(this.createDeliveryOrderButton).toBeVisible({ timeout: 15_000 });
     await this.createDeliveryOrderButton.click();
   }
@@ -176,8 +190,58 @@ export class NewDeliveryOrderPage {
     await this.finalPortSelect.selectOption({ label: finalPort });
   }
 
+  //unlike every other "شركة النقل" field in this app (which search/select by the full Arabic company name),
+  //this one is labeled "إختصار شركة النقل" (carrier ABBREVIATION) and is actually indexed by a short numeric
+  //carrier code, not the full name - confirmed live, 2026-09-26: typing the full name returned an unrelated
+  //result, but typing "65" correctly found and selected "الخطوط الجويه العربيه السعوديه". Known companies are
+  //translated to their code here so every caller can keep passing the same full name used everywhere else;
+  //anything not in the map is passed through unchanged (matches the old behavior for it):
+  private static readonly CARRIER_CODES: Record<string, string> = {
+    'الخطوط الجويه العربيه السعوديه': '65',
+  };
+
+  //unlike most autocomplete fields (handled fine by AutocompleteInput.select()'s fill()-based approach), this
+  //one's live-filter doesn't react to fill() at all - confirmed live, 2026-09-26: the field was still empty
+  //afterwards and the dropdown just showed its stale, unfiltered default option. Same fix already proven
+  //elsewhere in this codebase (e.g. fillMasterBillForm()'s destination-country field) - real per-character
+  //keystrokes via page.keyboard.type() instead:
   async fillCarrierPrefix(transportCompany: string): Promise<void> {
-    await this.autocomplete.select(this.carrierPrefixInput, transportCompany);
+    const carrierCode = NewDeliveryOrderPage.CARRIER_CODES[transportCompany] ?? transportCompany;
+
+    await expect(this.carrierPrefixInput).toBeVisible({ timeout: 25_000 });
+
+    //the dropdown option itself displays the full company name, not the code just typed to filter for it -
+    //confirmed live, 2026-09-26: typing "65" correctly filtered the list down to a single result whose own text
+    //was "الخطوط الجويه العربيه السعوديه":
+    const option = this.page
+      .locator('.autocomplete-result')
+      .filter({ hasText: transportCompany })
+      .and(this.page.locator(':visible'))
+      .first();
+
+    //the field's own live-filter seemingly drops an earlier keystroke sometimes (confirmed live, 2026-09-26:
+    //typing "65" left only "5" in the field, presumably a reset-on-no-match render racing the 2nd keystroke) -
+    //verify what actually landed and retype once before failing on a clear, actionable mismatch instead of the
+    //generic "dropdown option not found" this would otherwise surface as:
+    const attemptType = async () => {
+      await this.carrierPrefixInput.click();
+      await this.carrierPrefixInput.fill('');
+      await this.page.keyboard.type(carrierCode, { delay: 150 });
+
+      const actual = await this.carrierPrefixInput.inputValue().catch(() => '');
+
+      return actual === carrierCode;
+    };
+
+    if (!(await attemptType()) && !(await attemptType())) {
+      const actual = await this.carrierPrefixInput.inputValue().catch(() => '');
+      throw new Error(
+        `fillCarrierPrefix(): field shows "${actual}" instead of "${carrierCode}" after 2 attempts`
+      );
+    }
+
+    await expect(option).toBeVisible({ timeout: 10_000 });
+    await option.click();
   }
 
   //only enabled once the carrier above has been selected - blurring (Tab) after filling is what triggers the site
@@ -251,6 +315,11 @@ export class NewDeliveryOrderPage {
     await this.waitForManifestRefAutoFill(expectedReferenceNo);
     await this.fillReceiverName(data.receiverName);
     await this.fillReceiverId(data.receiverId);
+
+    //remembered so clickEditButton() can re-fill these explicitly if the reopened draft comes back without them
+    //(see clickEditButton()'s own comment):
+    this.lastFilledTransportCompany = transportCompany;
+    this.lastFilledBillNo = billNo;
   }
 
   //saves as a draft ("مسودة") - does not submit to customs, no رقم إذن التسليم is generated yet. Leaves a "تم حفظ"
@@ -260,15 +329,79 @@ export class NewDeliveryOrderPage {
   //network capture - this account's document numbers don't increase monotonically across the whole day the way
   //the list's default sort assumes), so reading "the first row" after saving silently returned a stale, unrelated
   //draft from earlier in the session instead of the one just created:
+  //confirmed live, 2026-09-26/27: even after the import manifest's own status reaches "تم استلامها", the DEO
+  //creation endpoint can still reject it with a popup reading "المانيفست غير موجود" (manifest not found) - a
+  //propagation delay between whatever service backs the status check and the one this save validates against,
+  //not a code bug (confirmed reproducible 3+ times, always immediately after the manifest's status flips to تم
+  //استلامها). A bounded retry on this SPECIFIC message only - not a general timeout increase (see
+  //feedback_no_timeout_bandaids) - since the underlying data catches up within a short wait:
   async clickSaveButton(): Promise<string> {
-    await expect(this.saveButton).toBeVisible();
-    await expect(this.saveButton).toBeEnabled();
+    const maxAttempts = 3;
+
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      await expect(this.saveButton).toBeVisible();
+      await expect(this.saveButton).toBeEnabled();
+
+      const responsePromise = this.page.waitForResponse(
+        (response) => response.url().includes('/api/air/v1/deo') && response.request().method() === 'POST'
+      );
+
+      await this.saveButton.click();
+
+      const response = await responsePromise;
+      const body = await response.json();
+      const deoDocRefNo: string = body?.result?.deoDocRefNo ?? '';
+
+      if (deoDocRefNo) {
+        await this.closeBlockingModalIfPresent();
+        return deoDocRefNo;
+      }
+
+      //confirmed live, 2026-09-27: this popup is NOT a .fasah-alert-danger (that class matched nothing) - match
+      //on the message text directly instead of guessing its container class:
+      const manifestNotFoundAlert = this.page.getByText('المانيفست غير موجود').and(this.page.locator(':visible'));
+      const isManifestNotFoundError = await manifestNotFoundAlert.isVisible().catch(() => false);
+
+      if (!isManifestNotFoundError) {
+        await this.closeBlockingModalIfPresent();
+        return deoDocRefNo;
+      }
+
+      //confirmed live, 2026-09-27: a single closeIfPresent() call here left this exact popup (".vx1.modal.show")
+      //still open, silently swallowed by its own try/catch, so the NEXT attempt's saveButton.click() then failed
+      //after actionTimeout with "intercepts pointer events" instead of clicking through - closeAllIfPresent()'s
+      //loop-until-count-0 is more robust, and explicitly wait for the message itself to actually disappear
+      //before looping back, rather than trusting one close attempt succeeded:
+      await this.modal.closeAllIfPresent();
+      await manifestNotFoundAlert.waitFor({ state: 'hidden', timeout: 10_000 }).catch(() => {});
+
+      if (attempt === maxAttempts) {
+        return deoDocRefNo;
+      }
+
+      console.log(`clickSaveButton(): "المانيفست غير موجود" on attempt ${attempt}/${maxAttempts} - waiting 10s and retrying`);
+      await this.page.waitForTimeout(10_000);
+    }
+
+    return '';
+  }
+
+  //submits the delivery order to customs - available directly on the create form, and again on a reopened draft's
+  //edit form (after clickEditButton()). Confirmed live, 2026-09-27: submitting from the create form hits
+  //POST /api/air/v1/deo, but submitting a REOPENED draft (this method's other call site) hits
+  //PUT /api/air/v1/deo/<id> instead - a plain POST-only filter never matched that PUT, so this silently waited
+  //the full actionTimeout even though the request had already succeeded (201). Accept either method:
+  async clickSubmitButton(): Promise<string> {
+    await expect(this.submitButton).toBeVisible();
+    await expect(this.submitButton).toBeEnabled();
 
     const responsePromise = this.page.waitForResponse(
-      (response) => response.url().includes('/api/air/v1/deo') && response.request().method() === 'POST'
+      (response) =>
+        response.url().includes('/api/air/v1/deo') &&
+        (response.request().method() === 'POST' || response.request().method() === 'PUT')
     );
 
-    await this.saveButton.click();
+    await this.submitButton.click();
 
     const response = await responsePromise;
     const body = await response.json();
@@ -279,19 +412,14 @@ export class NewDeliveryOrderPage {
     return deoDocRefNo;
   }
 
-  //submits the delivery order to customs - available directly on the create form, and again on a reopened draft's
-  //edit form (after clickEditButton()). Same leftover-toast behavior as clickSaveButton():
-  async clickSubmitButton(): Promise<void> {
-    await expect(this.submitButton).toBeVisible();
-    await expect(this.submitButton).toBeEnabled();
-    await this.submitButton.click();
-    await this.closeBlockingModalIfPresent();
-  }
-
-  //reopens an already-saved draft as an editable form (from its "تفاصيل الاذن الجوي" detail view) - fields come
-  //back pre-filled, so no need to refill anything before clickSubmitButton(). Waits for the edit form to actually
-  //finish loading before returning - clicking تقديم الطلب too soon after this can silently land on a stale button
-  //left over from the detail view (see waitForPageIdle()'s comment):
+  //reopens an already-saved draft as an editable form (from its "تفاصيل الاذن الجوي" detail view). The portal
+  //USUALLY pre-fills carrierPrefixInput/billDateSelect within milliseconds of the form appearing - but confirmed
+  //live via a network-capture diagnostic (2026-09-29) that on some reopens it never populates them at all (not
+  //slow - measured populated=true at 14ms when it works, still populated=false after a full 60s search when it
+  //doesn't), which is what was actually behind the intermittent "التاريخ المرسل خاطىء" submit failures. A longer
+  //wait cannot fix a field that was never going to populate, so this no longer waits-and-hopes: it does a short
+  //check, and if that comes back empty, explicitly re-fills using whatever fillDeliveryOrderForm() last filled
+  //(remembered in lastFilledTransportCompany/lastFilledBillNo) instead of trusting the reopen to have worked.
   async clickEditButton(): Promise<void> {
     await expect(this.editButton).toBeVisible({ timeout: 15_000 });
     await expect(this.editButton).toBeEnabled();
@@ -301,6 +429,36 @@ export class NewDeliveryOrderPage {
     //slightly behind that (confirmed live: without this, تقديم الطلب's click "succeeds" but never actually calls
     //the submit API), same fixed-wait idiom used elsewhere in this codebase (e.g. clickHistoryTab()):
     await this.page.waitForTimeout(1_500);
+
+    const carrierPrefilled = await expect
+      .poll(async () => (await this.carrierPrefixInput.inputValue().catch(() => '')) !== '', { timeout: 5_000 })
+      .toBe(true)
+      .then(() => true)
+      .catch(() => false);
+    const billDatePrefilled = await expect
+      .poll(async () => (await this.billDateSelect.inputValue().catch(() => '')) !== '', { timeout: 5_000 })
+      .toBe(true)
+      .then(() => true)
+      .catch(() => false);
+
+    if (carrierPrefilled && billDatePrefilled) {
+      return;
+    }
+
+    if (!this.lastFilledTransportCompany || !this.lastFilledBillNo) {
+      //nothing to fall back to (e.g. fillDeliveryOrderForm() was never called on this page instance) - leave it
+      //to clickSubmitButton() to fail with a clear error rather than silently proceeding on empty fields:
+      return;
+    }
+
+    //confirmed live, 2026-09-30: this fallback path can itself run into a stray "vx1 modal show" popup (e.g. a
+    //license-expiry notice) intercepting fillCarrierPrefix()'s click - close anything blocking before re-filling,
+    //same guard used everywhere else in this codebase before a risky click:
+    await this.closeBlockingModalIfPresent();
+
+    await this.fillCarrierPrefix(this.lastFilledTransportCompany);
+    await this.fillBillNumber(this.lastFilledBillNo);
+    await this.selectBillDate();
   }
 
   //cancels an already-accepted (مقبول) delivery order - confirms the "هل تريد الغاء اذن التسليم الجوي؟" dialog via
@@ -342,6 +500,12 @@ export class NewDeliveryOrderPage {
     //a toast from whatever action preceded this search (e.g. the save that just happened) can still be showing
     //and blocks the search field from receiving the click - close it up before trying:
     await this.closeBlockingModalIfPresent();
+
+    //confirmed live, 2026-09-27: even after the modal itself is dismissed (manually or via the above), its
+    //.modal-backdrop can linger invisibly on top of the page and silently intercept the click below forever -
+    //same class of issue already handled this way elsewhere (HouseAirwayBillPage, InternalDeliveryOrderPage):
+    await this.page.locator('.modal-backdrop').waitFor({ state: 'hidden', timeout: 5_000 }).catch(() => {});
+
     await this.searchInput.click();
     await this.searchInput.fill('');
     await this.page.keyboard.type(referenceNumber, { delay: 100 });

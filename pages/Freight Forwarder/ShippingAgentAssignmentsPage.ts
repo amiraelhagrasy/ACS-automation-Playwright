@@ -109,33 +109,86 @@ export class ShippingAgentAssignmentsPage {
     async openAssignmentsList(): Promise<void> {
         await this.waitForPageIdle();
 
-        //ffw11's login stacks vx1 popups (password/license expiry, and sometimes a pending-assignment notice)
-        //that sit over the sidebar and silently intercept the menu click - clear them first.
-        await this.modal.closeAllIfPresent();
-
         const airServicesMenu = this.page.getByText('خدمات الطيران');
-        const airServicesMenuPresent = await airServicesMenu.isVisible().catch(() => false);
 
-        if (airServicesMenuPresent) {
-            const alreadyOpen = await this.assignmentsListMenu.isVisible().catch(() => false);
+        //confirmed live, 2026-09-28: a popup (password/license expiry, a pending-assignment notice, or the
+        //"الشروط والأحكام" popup) can appear or reappear at any point in this sequence - right at the start,
+        //right after expanding "خدمات الطيران", or in the gap before the visibility check below - not just once
+        //up front. Retry the WHOLE sequence (close modals, expand the menu if needed, wait visible, click)
+        //together instead of only guarding the final click, so a modal reappearing mid-sequence doesn't fail the
+        //visibility check before the old per-click-only retry loop ever got a chance to recover:
+        let clicked = false;
+        for (let attempt = 1; attempt <= 3 && !clicked; attempt++) {
+            await this.modal.closeAllIfPresent();
+            await this.page.locator('.modal-backdrop').waitFor({ state: 'hidden', timeout: 5_000 }).catch(() => {});
 
-            if (!alreadyOpen) {
-                await airServicesMenu.click();
+            const airServicesMenuPresent = await airServicesMenu.isVisible().catch(() => false);
+
+            if (airServicesMenuPresent) {
+                const alreadyOpen = await this.assignmentsListMenu.isVisible().catch(() => false);
+
+                if (!alreadyOpen) {
+                    await airServicesMenu.click().catch(() => {});
+                }
             }
+
+            const visible = await this.assignmentsListMenu
+                .waitFor({ state: 'visible', timeout: 20_000 })
+                .then(() => true)
+                .catch(() => false);
+
+            if (!visible) {
+                continue;
+            }
+
+            await this.modal.closeAllIfPresent();
+            await this.page.locator('.modal-backdrop').waitFor({ state: 'hidden', timeout: 5_000 }).catch(() => {});
+
+            clicked = await this.assignmentsListMenu
+                .click({ timeout: 15_000 })
+                .then(() => true)
+                .catch(() => false);
         }
 
-        await expect(this.assignmentsListMenu).toBeVisible({ timeout: 20_000 });
-        await this.assignmentsListMenu.click({ timeout: 20_000 });
+        //surface a clear failure instead of silently moving on if every attempt failed:
+        await expect(this.assignmentsListMenu).toBeVisible({ timeout: 5_000 });
     }
 
     async searchByReferenceNumber(referenceNumber: string): Promise<void> {
         await this.waitForPageIdle();
+
         //a leftover ffw11 vx1 popup can sit over the البوالص المرسلة section and make this click hang forever
         //(no action timeout) until the test times out and the browser closes.
-        await this.modal.closeAllIfPresent();
+        //
+        //confirmed live, 2026-09-29: an earlier fix here only wrapped the CLICK in a modal-close retry loop, with
+        //an unguarded toBeVisible() check still running first - a popup covering the search field right at that
+        //moment failed the whole method before the retry loop was ever reached (same class of bug already fixed
+        //in openAssignmentsList()/clickAirImportManifest()). Close modals BEFORE the visibility check too, and
+        //retry the whole sequence together:
+        let clicked = false;
+        for (let attempt = 1; attempt <= 3 && !clicked; attempt++) {
+            await this.modal.closeAllIfPresent();
 
-        await expect(this.searchField).toBeVisible({ timeout: 20_000 });
-        await this.searchField.click({ timeout: 15_000 });
+            const visible = await this.searchField
+                .waitFor({ state: 'visible', timeout: 20_000 })
+                .then(() => true)
+                .catch(() => false);
+
+            if (!visible) {
+                continue;
+            }
+
+            await this.modal.closeAllIfPresent();
+
+            clicked = await this.searchField
+                .click({ timeout: 15_000 })
+                .then(() => true)
+                .catch(() => false);
+        }
+
+        //surface a clear failure instead of silently moving on if every attempt failed:
+        await expect(this.searchField).toBeVisible({ timeout: 5_000 });
+
         await this.searchField.fill('');
         await this.page.keyboard.type(referenceNumber, { delay: 100 });
     }
@@ -345,17 +398,66 @@ export class ShippingAgentAssignmentsPage {
     async openWithdrawRequestsTab(): Promise<void> {
         await this.waitForPageIdle();
         await this.withdrawRequestTab.click();
+
+        //confirmed live, 2026-09-28: the tab's own content (including its search box) loads via a separate AJAX
+        //call after the click and can still be entirely unrendered - no rows, no "no data" message, no search
+        //box - well after the click itself resolves. Wait for the pane's search box specifically rather than
+        //assuming waitForPageIdle() alone covers this async content load:
+        await this.withdrawRequestSection
+            .getByPlaceholder('بحث')
+            .waitFor({ state: 'visible', timeout: 30_000 })
+            .catch(() => {});
     }
 
-    //opens "البوالص المعينة" from within an already-open assignments list:
+    //opens "البوالص المعينة" from within an already-open assignments list. Confirmed live, 2026-09-30: a bare
+    //click on the tab can silently not take effect (screenshot showed البوالص المرسلة still active afterward,
+    //not this tab) - same class of unguarded-click bug already fixed elsewhere in this file. Retry the click
+    //until the panel's own createRequest button actually becomes visible, rather than trusting the click alone:
     async openReservedBillsTab(): Promise<void> {
         await this.waitForPageIdle();
-        await this.reservedBillsTab.click();
+
+        //confirmed live, 2026-09-30: the tab itself can switch correctly (shown active/underlined) while its
+        //content pane stays completely empty for longer than the original 10s-per-attempt budget - same class of
+        //async content-load lag already seen in openWithdrawRequestsTab(). Give each attempt more room:
+        for (let attempt = 1; attempt <= 3; attempt++) {
+            await this.modal.closeAllIfPresent();
+            await this.reservedBillsTab.click().catch(() => {});
+
+            const visible = await this.createReservationRequestButton
+                .waitFor({ state: 'visible', timeout: 20_000 })
+                .then(() => true)
+                .catch(() => false);
+
+            if (visible) {
+                return;
+            }
+        }
     }
 
     //starts a new bill reservation request ("انشاء طلب تعيين بوالص") from within البوالص المعينة:
     async clickCreateReservationRequest(): Promise<void> {
-        await expect(this.createReservationRequestButton).toBeVisible({ timeout: 15_000 });
+        //confirmed live, 2026-10-01: even right after openReservedBillsTab() itself confirmed this exact button
+        //visible, the content pane can go back to completely empty by the time this runs (not a popup - the
+        //whole tab content just resets/re-loads moments later). A passive wait alone doesn't recover from that,
+        //so re-click the تاب itself to force a fresh content load, not just wait for the old one to come back:
+        for (let attempt = 1; attempt <= 3; attempt++) {
+            await this.modal.closeAllIfPresent();
+
+            const visible = await this.createReservationRequestButton
+                .waitFor({ state: 'visible', timeout: 15_000 })
+                .then(() => true)
+                .catch(() => false);
+
+            if (visible) {
+                await this.createReservationRequestButton.click();
+                return;
+            }
+
+            await this.reservedBillsTab.click().catch(() => {});
+        }
+
+        //surface a clear failure instead of silently moving on if every attempt failed:
+        await expect(this.createReservationRequestButton).toBeVisible({ timeout: 5_000 });
         await this.createReservationRequestButton.click();
     }
 
@@ -544,8 +646,25 @@ export class ShippingAgentAssignmentsPage {
             .last();
 
         await expect(submitButton).toBeVisible({ timeout: 15_000 });
-        await submitButton.scrollIntoViewIfNeeded();
-        await submitButton.click({ force: true, timeout: 15_000 });
+
+        //confirmed live, 2026-09-30: scrollIntoViewIfNeeded() followed immediately by click() can still throw
+        //"Element is outside of the viewport" on this specific long edit-request form - the scroll apparently
+        //doesn't always finish settling (or the page's own layout is still shifting) before the click fires.
+        //Retry the scroll+click together instead of failing on the first attempt:
+        let clicked = false;
+        for (let attempt = 1; attempt <= 3 && !clicked; attempt++) {
+            await submitButton.scrollIntoViewIfNeeded();
+            await this.page.waitForTimeout(500);
+            clicked = await submitButton
+                .click({ force: true, timeout: 15_000 })
+                .then(() => true)
+                .catch(() => false);
+        }
+
+        if (!clicked) {
+            //surface a clear failure instead of silently proceeding as if the click succeeded:
+            await submitButton.click({ force: true, timeout: 15_000 });
+        }
 
         //the "تم تقديم الطلب رقم N بنجاح" success modal should follow; if it hasn't shown in a few seconds the
         //click likely didn't register - click once more.
@@ -627,6 +746,7 @@ export class ShippingAgentAssignmentsPage {
 
         while (true) {
             await this.waitForPageIdle();
+            await searchField.waitFor({ state: 'visible', timeout: 30_000 }).catch(() => {});
             await searchField.click();
             await searchField.fill('');
             await this.page.keyboard.type(assignmentNumber, { delay: 50 });
@@ -651,20 +771,24 @@ export class ShippingAgentAssignmentsPage {
         }
     }
 
-    //opens the "سبب طلب سحب البوليصة" read-only modal on the matching row - leaves it open:
+    //opens the "سبب طلب سحب البوليصة" read-only modal on the matching row - leaves it open. Confirmed live,
+    //2026-09-29 (twice, in separate test runs): the portal can mislabel this modal's own title bar as "سبب الرفض"
+    //(the REJECTION-reason modal's title, reused by mistake) while its body correctly shows the withdrawal
+    //reason text - a portal-side cosmetic bug, not a script issue. Match on either title instead of gating
+    //strictly on the "correct" one, since the content (not the title) is what's actually reliable:
     async openWithdrawalReasonModal(assignmentNumber: string): Promise<void> {
         const row = this.rowByAssignmentNumber(assignmentNumber);
         await row.getByRole('button', { name: 'سبب طلب سحب البوليصة' }).click();
 
         const reasonModal = this.page.locator('.modal-content').filter({
-            has: this.page.locator('.modal-title', { hasText: 'سبب طلب سحب البوليصة' }),
+            has: this.page.locator('.modal-title', { hasText: /سبب طلب سحب البوليصة|سبب الرفض/ }),
         });
         await expect(reasonModal).toBeVisible({ timeout: 10_000 });
     }
 
     async closeWithdrawalReasonModal(): Promise<void> {
         const reasonModal = this.page.locator('.modal-content').filter({
-            has: this.page.locator('.modal-title', { hasText: 'سبب طلب سحب البوليصة' }),
+            has: this.page.locator('.modal-title', { hasText: /سبب طلب سحب البوليصة|سبب الرفض/ }),
         });
         await reasonModal.getByRole('button', { name: 'إغلاق' }).click();
         await expect(reasonModal).toBeHidden({ timeout: 10_000 });

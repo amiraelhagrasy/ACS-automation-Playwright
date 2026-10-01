@@ -62,9 +62,10 @@ export class InternalDeliveryOrderPage {
             .locator('input[test-attr="shipping_agent_manifest_labels_receiverid"]')
             .and(this.page.locator(':visible'))
             .last();
-        //optional - same field/behaviour as the broker form's رقم المستورد: whichever suggestion is picked, this
-        //form's real submitted value is always "194133" (confirmed live via the input's selectedvalue attribute),
-        //which this account has no matching importer for - so filling this in reliably gets the request rejected.
+        //optional - same field/behaviour as the broker form's رقم المستورد. The suggestion picked determines the
+        //real submitted importer: 'مؤسسة قريطة للتجارة' always resolves to "194133", an importer this account has
+        //no match for, so it reliably gets the request rejected - typing '4' and picking the first suggestion
+        //resolves to a real, matching importer instead.
         this.importerNoInput = this.page
             .locator('input[test-attr="shipping_agent_manifest_labels_importer_no"]')
             .and(this.page.locator(':visible'))
@@ -153,10 +154,9 @@ export class InternalDeliveryOrderPage {
         await this.page.keyboard.press('Escape').catch(() => {});
     }
 
-    //optional - selecting any importer suggestion here always resolves to the same underlying (invalid) importer
-    //number for this account (see the constructor comment above) - filling this in reliably gets the request
-    //rejected once submitted. Uses selectFirst() rather than select(): the dropdown's entries are cosmetic display
-    //text with no real backing id, same quirk as the broker form's رقم المستورد field.
+    //optional - which suggestion resolves to a valid vs. invalid importer depends on the search text (see the
+    //constructor comment above). Uses selectFirst() rather than select(): the dropdown's entries are cosmetic
+    //display text with no real backing id, same quirk as the broker form's رقم المستورد field.
     async fillImporterNo(triggerText: string): Promise<void> {
         await this.autocomplete.selectFirst(this.importerNoInput, triggerText);
     }

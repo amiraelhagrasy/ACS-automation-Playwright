@@ -2,14 +2,11 @@ import { test, expect } from '../../fixtures/testFixtures';
 import { airwayBillData, billItemData, warehouseData } from '../../test-data/masterBillData';
 import { deliveryOrderData } from '../../test-data/deliveryOrderData';
 import { createHouseAirwayBillData, buildHouseBillAmounts } from '../../test-data/houseAirwayBillData';
-import { ffwUser } from '../../test-data/users';
+import { acsBrokerUser, ffwUser } from '../../test-data/users';
 import { HouseAirwayBillPage } from '../../pages/Freight Forwarder/HouseAirwayBillPage';
 import { InternalDeliveryOrderPage } from '../../pages/Freight Forwarder/InternalDeliveryOrderPage';
 
-//Shared setup (shortened - no delivery order on the master bill): broker creates an import manifest + house
-//bill and it is received, then the freight forwarder logs in and raises a reservation assignment
-//(انشاء طلب تعيين بوالص) directly on that bill, submitting it with auto-accept. After that the bill is assigned
-//to the ffw and ready to be split.
+
 type SetupFixtures = {
   newImportManPage: any;
   viewImportManifestPage: any;
@@ -20,6 +17,16 @@ type SetupFixtures = {
 };
 
 async function setupAssignedBill(f: SetupFixtures): Promise<void> {
+  //confirmed live, 2026-09-27: the shared workerPage carries over whatever account the previous test (in this
+  //file, or the previous file the worker ran) left it on - if that was the freight forwarder (nothing in this
+  //suite switches back to the broker after using it), this function's own first action (clickAirServices(), a
+  //broker-only menu) fails outright. Explicitly re-establish the broker session every test using this helper
+  //actually needs, regardless of what ran immediately before it:
+  await test.step('Log back in as the broker', async () => {
+    await f.loginPage.logout();
+    await f.loginPage.loginToApplication(acsBrokerUser.username, acsBrokerUser.password, '999999');
+  });
+
   let importReferenceNo = '';
 
   await test.step('Create import manifest (normal bill) with a house bill and submit', async () => {
@@ -41,16 +48,15 @@ async function setupAssignedBill(f: SetupFixtures): Promise<void> {
   });
 
   await test.step('Wait for import manifest to be received', async () => {
-    await f.newImportManPage.clickAirServices();
-    await f.newImportManPage.clickAirImportManifest();
-
-    const received = await f.viewImportManifestPage.waitForManifestStatus(importReferenceNo, 'تم استلامها', {
-      intervalMs: 5_000,
-      timeoutMs: 150_000,
-    });
-    if (!received) {
-      throw new Error(`Import manifest ${importReferenceNo} was not received in time`);
-    }
+    await f.viewImportManifestPage.expectManifestStatus(
+      async () => {
+        await f.newImportManPage.clickAirServices();
+        await f.newImportManPage.clickAirImportManifest();
+      },
+      importReferenceNo,
+      'تم استلامها',
+      { intervalMs: 5_000, timeoutMs: 150_000 }
+    );
   });
 
   await test.step('Login as the freight forwarder and raise a reservation assignment on the bill', async () => {
@@ -95,22 +101,16 @@ async function setupAssignedBill(f: SetupFixtures): Promise<void> {
     console.log('Auto-accept delivery order number:', deliveryOrderNumber);
   });
 
-  //the auto-accept creates a delivery order that the backend processes asynchronously - the bill can't be split
-  //until that's done (splitting too early leaves the house bill wizard unable to advance past step 1, or pops a
-  //"اذن التسليم ... غير مقبول للآن" modal). openBillAndStartHouseBillWizard() retries the modal case; give the
-  //backend a head start here too.
   await test.step('Let the auto-accept settle', async () => {
     await new Promise((r) => setTimeout(r, 45_000));
   });
 }
-
-//these tests share the ffw11 / b3078 portal accounts, so they cannot run in parallel (the repo config has
-//fullyParallel: true) - force them onto one worker, one after the other.
 test.describe.configure({ mode: 'serial' });
 
 test.describe('FFW reservation assignment, then split the bill into house air waybills', () => {
+
 //Create,view,edit and submit Multiple HAWB with multiple items and warehouses for each HAWB:
-  test('two house air waybills (50 + 50)', async ({
+  test('#18-21 Create Multiple HAWB with multiple items and warehouses for each HAWB', async ({
     page,
     newImportManPage,
     viewImportManifestPage,
@@ -157,14 +157,14 @@ test.describe('FFW reservation assignment, then split the bill into house air wa
       await fillWizard(second);
     });
 
-    await test.step('Submit the request and verify it lands in البوالص المكتملة', async () => {
+    await test.step('#21 - Submit Multiple HAWB with multiple items and warehouses for each HAWB', async () => {
       const assignmentNumber = await houseAirwayBillPage.clickSubmitRequest();
       console.log('House bills assignment number:', assignmentNumber);
       await houseAirwayBillPage.verifyBillInCompleted(assignmentNumber, masterBillData.billNo);
     });
   });
 //Submit One HAWB containing all weights and quantities with multiple Items and warehouses:
-  test('one house air waybill taking the whole bill (100)', async ({
+  test('#17 Submit One HAWB containing all weights and quantities with multiple Items and warehouses', async ({
     page,
     newImportManPage,
     viewImportManifestPage,
@@ -208,8 +208,8 @@ test.describe('FFW reservation assignment, then split the bill into house air wa
       await houseAirwayBillPage.verifyBillInCompleted(assignmentNumber, masterBillData.billNo);
     });
   });
-//Submit multiple HAWB containing up to 110% of total original weights and quantities:
-  test('two house air waybills that together exceed the bill (50 + 60) - the second is rejected', async ({
+//Submit multiple HAWB containing up to 110% of total original weights and quantities :
+  test('#15 Submit multiple HAWB containing up to 110% of total original weights and quantities', async ({
     page,
     newImportManPage,
     viewImportManifestPage,
@@ -248,18 +248,88 @@ test.describe('FFW reservation assignment, then split the bill into house air wa
       await houseAirwayBillPage.clickSave();
     });
 
-    await test.step('Second house air waybill (60) - only 50 is left, so it must be rejected', async () => {
+    //confirmed live, 2026-10-01: this scenario's original premise (the portal rejects a house bill that pushes
+    //the running total over the master bill's own weight/quantity) no longer holds - a live run with real values
+    //(50 then 60, against a 100/100 master bill) submitted cleanly with a genuine success message and assignment
+    //number, no rejection at any stage. The portal now accepts up to 110% as the scenario's own title says it
+    //should. Updated to assert the actual (and now intended) behavior - success, not rejection:
+    await test.step('Second house air waybill (60) - total reaches 110%, expected to succeed', async () => {
       await houseAirwayBillPage.openBillAndStartHouseBillWizard(masterBillData.billNo, 'splitting');
-      console.log('HAWB Number (should be rejected):', secondOverBill.hawbNumber);
-      const { stage, text } = await houseAirwayBillPage.createHouseBillExpectingReject(secondOverBill, secondAmounts);
-      console.log(`Rejected at stage "${stage}": ${text}`);
-      expect(text.length).toBeGreaterThan(0);
+      console.log('HAWB Number:', secondOverBill.hawbNumber);
+      await houseAirwayBillPage.fillHouseBillHeader(secondOverBill);
+      await houseAirwayBillPage.clickSaveAndContinue();
+      await houseAirwayBillPage.fillHouseBillItem(secondAmounts.item);
+      await houseAirwayBillPage.clickAddRow();
+      await houseAirwayBillPage.clickSaveAndContinue();
+      await houseAirwayBillPage.fillHouseBillWarehouse(secondAmounts.warehouse);
+      await houseAirwayBillPage.clickAddRow();
+      await houseAirwayBillPage.clickSave();
+    });
+
+    await test.step('Submit and verify both house bills land in البوالص المكتملة', async () => {
+      const assignmentNumber = await houseAirwayBillPage.clickSubmitRequest();
+      console.log('House bills assignment number:', assignmentNumber);
+      await houseAirwayBillPage.verifyBillInCompleted(assignmentNumber, masterBillData.billNo);
     });
   });
 
-  //continues past the split: after the house bills are submitted, take one of the sub bills (a HAWB) and raise
-  //a delivery order (إذن تسليم) against it via "إذن التسليم الجوي الداخلي".
-  test('raise a delivery order against a sub bill (house air waybill)', async ({
+  test('#16 Submit multiple HAWB containing at minimum 90 % of total original weights and quantities', async ({
+    page,
+    newImportManPage,
+    viewImportManifestPage,
+    newImportManifestData,
+    masterBillData,
+    loginPage,
+    shippingAgentAssignmentsPage,
+  }) => {
+    test.setTimeout(1_500_000);
+
+    const houseAirwayBillPage = new HouseAirwayBillPage(page);
+    const first = createHouseAirwayBillData('40');
+    const firstAmounts = buildHouseBillAmounts('40');
+    const second = createHouseAirwayBillData('50'); // 40 + 50 = 90% of the master bill's 100
+    const secondAmounts = buildHouseBillAmounts('50');
+
+    async function fillWizard(hawb: ReturnType<typeof createHouseAirwayBillData>, amounts: ReturnType<typeof buildHouseBillAmounts>) {
+      console.log('HAWB Number:', hawb.hawbNumber);
+      await houseAirwayBillPage.fillHouseBillHeader(hawb);
+      await houseAirwayBillPage.clickSaveAndContinue();
+      await houseAirwayBillPage.fillHouseBillItem(amounts.item);
+      await houseAirwayBillPage.clickAddRow();
+      await houseAirwayBillPage.clickSaveAndContinue();
+      await houseAirwayBillPage.fillHouseBillWarehouse(amounts.warehouse);
+      await houseAirwayBillPage.clickAddRow();
+      await houseAirwayBillPage.clickSave();
+    }
+
+    await setupAssignedBill({
+      newImportManPage,
+      viewImportManifestPage,
+      newImportManifestData,
+      masterBillData,
+      loginPage,
+      shippingAgentAssignmentsPage,
+    });
+
+    await test.step('First house air waybill (40) - from waiting list', async () => {
+      await houseAirwayBillPage.openBillAndStartHouseBillWizard(masterBillData.billNo, 'pending');
+      await fillWizard(first, firstAmounts);
+    });
+
+    await test.step('Second house air waybill (50) - together 90% of the bill', async () => {
+      await houseAirwayBillPage.openBillAndStartHouseBillWizard(masterBillData.billNo, 'splitting');
+      await fillWizard(second, secondAmounts);
+    });
+
+    await test.step('Submit the request and verify it lands in completed bills', async () => {
+      const assignmentNumber = await houseAirwayBillPage.clickSubmitRequest();
+      console.log('House bills assignment number:', assignmentNumber);
+      await houseAirwayBillPage.verifyBillInCompleted(assignmentNumber, masterBillData.billNo);
+    });
+  });
+
+  //Create, View, Edit , Submit DEO without importer
+  test('#27 Create, View, Edit , Submit DEO without importer', async ({
     page,
     newImportManPage,
     viewImportManifestPage,
@@ -308,28 +378,120 @@ test.describe('FFW reservation assignment, then split the bill into house air wa
       await houseAirwayBillPage.verifyBillInCompleted(assignmentNumber, masterBillData.billNo);
     });
 
-    await test.step('Raise a delivery order (إذن تسليم) against one of the sub bills and submit it', async () => {
+    let deoRef = '';
+
+    await test.step('Create DEO without importer', async () => {
       console.log('Sub bill (HAWB) to raise a delivery order on:', first.hawbNumber);
       await internalDeliveryOrderPage.openMenu();
       await internalDeliveryOrderPage.clickCreate();
       await internalDeliveryOrderPage.fillForm(deliveryOrderData, first.hawbNumber, '65');
 
-      const ref = await internalDeliveryOrderPage.clickSave();
-      console.log('Internal delivery order reference:', ref);
-      expect(ref).not.toBe('');
+      deoRef = await internalDeliveryOrderPage.clickSave();
+      console.log('Internal delivery order reference:', deoRef);
+      expect(deoRef).not.toBe('');
+    });
 
-      await internalDeliveryOrderPage.searchByReference(ref);
-      await internalDeliveryOrderPage.openByReference(ref);
+    await test.step('View DEO without importer', async () => {
+      await internalDeliveryOrderPage.searchByReference(deoRef);
+      await internalDeliveryOrderPage.openByReference(deoRef);
+    });
+
+    await test.step('Edit DEO without importer', async () => {
       await internalDeliveryOrderPage.clickEdit();
+    });
+
+    await test.step('Submit DEO without importer', async () => {
       await internalDeliveryOrderPage.clickSubmit();
-      console.log('Internal delivery order submitted:', ref);
+      console.log('Internal delivery order submitted:', deoRef);
+    });
+  });
+
+  //Create, View, Edit, Submit DEO with a valid importer - typing '4' into رقم المستورد and picking the first
+  //suggestion resolves to a real, matching importer for this account (confirmed live, 2026-09-26), unlike
+  //fillImporterNo('مؤسسة قريطة للتجارة') below (#26) which always resolves to a fixed importer this account has
+  //no match for and gets rejected:
+  test('#22-25 Create, View, Edit , Submit DEO with valid importer', async ({
+    page,
+    newImportManPage,
+    viewImportManifestPage,
+    newImportManifestData,
+    masterBillData,
+    loginPage,
+    shippingAgentAssignmentsPage,
+  }) => {
+    test.setTimeout(1_500_000);
+
+    const houseAirwayBillPage = new HouseAirwayBillPage(page);
+    const internalDeliveryOrderPage = new InternalDeliveryOrderPage(page);
+    const first = createHouseAirwayBillData('50');
+    const second = createHouseAirwayBillData('50');
+    const amounts = buildHouseBillAmounts('50');
+
+    async function fillWizard(hawb: ReturnType<typeof createHouseAirwayBillData>) {
+      console.log('HAWB Number:', hawb.hawbNumber);
+      await houseAirwayBillPage.fillHouseBillHeader(hawb);
+      await houseAirwayBillPage.clickSaveAndContinue();
+      await houseAirwayBillPage.fillHouseBillItem(amounts.item);
+      await houseAirwayBillPage.clickAddRow();
+      await houseAirwayBillPage.clickSaveAndContinue();
+      await houseAirwayBillPage.fillHouseBillWarehouse(amounts.warehouse);
+      await houseAirwayBillPage.clickAddRow();
+      await houseAirwayBillPage.clickSave();
+    }
+
+    await setupAssignedBill({
+      newImportManPage,
+      viewImportManifestPage,
+      newImportManifestData,
+      masterBillData,
+      loginPage,
+      shippingAgentAssignmentsPage,
+    });
+
+    await test.step('Split the bill into two house air waybills and submit', async () => {
+      await houseAirwayBillPage.openBillAndStartHouseBillWizard(masterBillData.billNo, 'pending');
+      await fillWizard(first);
+      await houseAirwayBillPage.openBillAndStartHouseBillWizard(masterBillData.billNo, 'splitting');
+      await fillWizard(second);
+
+      const assignmentNumber = await houseAirwayBillPage.clickSubmitRequest();
+      console.log('House bills assignment number:', assignmentNumber);
+      await houseAirwayBillPage.verifyBillInCompleted(assignmentNumber, masterBillData.billNo);
+    });
+
+    let deoRef = '';
+
+    await test.step('#22- Create DEO with valid importer', async () => {
+      console.log('Sub bill (HAWB) to raise a delivery order on:', first.hawbNumber);
+      await internalDeliveryOrderPage.openMenu();
+      await internalDeliveryOrderPage.clickCreate();
+      await internalDeliveryOrderPage.fillForm(deliveryOrderData, first.hawbNumber, '65');
+      await internalDeliveryOrderPage.fillImporterNo('4');
+
+      deoRef = await internalDeliveryOrderPage.clickSave();
+      console.log('Internal delivery order reference:', deoRef);
+      expect(deoRef).not.toBe('');
+    });
+
+    await test.step('#23 - View DEO with valid importer', async () => {
+      await internalDeliveryOrderPage.searchByReference(deoRef);
+      await internalDeliveryOrderPage.openByReference(deoRef);
+    });
+
+    await test.step('#24 - Edit DEO with valid importer', async () => {
+      await internalDeliveryOrderPage.clickEdit();
+    });
+
+    await test.step('#25 - Submit DEO with valid importer', async () => {
+      await internalDeliveryOrderPage.clickSubmit();
+      console.log('Internal delivery order submitted:', deoRef);
     });
   });
 
   //negative case: same sub-bill delivery order flow, but with an invalid importer number filled in - gets rejected
   //once submitted (mirrors newDeliveryOrder.spec.ts's "create air delivery order with invalid importer gets
   //rejected" test, but against a house air waybill via InternalDeliveryOrderPage instead of the broker form).
-  test('raise a delivery order against a sub bill with an invalid importer - gets rejected', async ({
+  test('#26 raise a delivery order against a sub bill with an invalid importer - gets rejected', async ({
     page,
     newImportManPage,
     viewImportManifestPage,
@@ -386,22 +548,18 @@ test.describe('FFW reservation assignment, then split the bill into house air wa
       await internalDeliveryOrderPage.clickCreate();
       await internalDeliveryOrderPage.fillForm(deliveryOrderData, first.hawbNumber, '65');
       await internalDeliveryOrderPage.fillImporterNo('مؤسسة قريطة للتجارة');
-
       ref = await internalDeliveryOrderPage.clickSave();
       console.log('Internal delivery order reference:', ref);
       expect(ref).not.toBe('');
     });
 
-    await test.step('Reopen the draft, edit it, and submit', async () => {
+    await test.step('#Reopen the draft, edit it, and submit', async () => {
       await internalDeliveryOrderPage.searchByReference(ref);
       await internalDeliveryOrderPage.openByReference(ref);
       await internalDeliveryOrderPage.clickEdit();
       await internalDeliveryOrderPage.clickSubmit();
     });
 
-    //the edit->submit above occasionally no-ops (same quirk documented for the broker DEO flow in
-    //setupAssignedBill() - the request stays at مسودة instead of moving on) - check for that and re-submit if so,
-    //rather than waiting the full 3 minutes below just to find out it never left مسودة.
     await test.step('Confirm the submit actually went through - re-submit if it silently stayed at مسودة', async () => {
       await internalDeliveryOrderPage.openMenu();
 

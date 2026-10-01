@@ -35,7 +35,32 @@ export class LoginPage {
     await this.passwordInput.fill(password);
   }
 
-  async clickLoginButton() {
+  async clickLoginButton(expectedUsername?: string, expectedPassword?: string) {
+    //the login form's own submit handler references window.grecaptcha directly (login.js) - confirmed live,
+    //2026-09-26: clicking before that script finishes loading/initializing throws "ReferenceError: grecaptcha is
+    //not defined" inside the page, silently breaking the submit and leaving the OTP field never appearing.
+    //Automation clicks far faster than a human would, so this race is much more likely to be hit here than in
+    //real usage - wait for it to exist first, falling through if the timeout is hit rather than blocking forever:
+    await this.page
+      .waitForFunction(() => (window as any).grecaptcha !== undefined, undefined, { timeout: 10_000 })
+      .catch(() => {});
+
+    //confirmed live, 2026-09-27: right after logout() (a client-side redirect back to the login screen, not a
+    //fresh page.goto()), username/password can get wiped by the page's own form reset sometime during the wait
+    //above, even though they were filled correctly right before this method was called - re-check immediately
+    //before the actual click and refill if either was cleared in the meantime:
+    if (expectedUsername !== undefined && expectedPassword !== undefined) {
+      const actualUsername = await this.usernameInput.inputValue().catch(() => '');
+      const actualPassword = await this.passwordInput.inputValue().catch(() => '');
+
+      if (actualUsername !== expectedUsername) {
+        await this.usernameInput.fill(expectedUsername);
+      }
+      if (actualPassword !== expectedPassword) {
+        await this.passwordInput.fill(expectedPassword);
+      }
+    }
+
     await this.loginButton.click();
   }
 
@@ -49,7 +74,9 @@ export class LoginPage {
   async login(username: string, password: string) {
     await this.enterUsername(username);
     await this.enterPassword(password);
-    await this.clickLoginButton();
+    //pass the expected values through so clickLoginButton() can catch a late wipe of either field - see its own
+    //comment for why the wipe can happen after this point, not just before it:
+    await this.clickLoginButton(username, password);
   }
 
    async verifyOtpFieldIsDisplayed() {

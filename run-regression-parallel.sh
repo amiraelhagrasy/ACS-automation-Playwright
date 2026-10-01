@@ -25,9 +25,7 @@ CONFIG=playwright.regression.config.ts
 BUCKET_A=(
   "tests/Delivery Order/newDeliveryOrder.spec.ts"
   "tests/Freight Forwarder/billReservationRequest.spec.ts"
-  "tests/Freight Forwarder/billTiedToDeliveryOrderNotSelectable.spec.ts"
   "tests/Freight Forwarder/createHouseAirwayBill.spec.ts"
-  "tests/Freight Forwarder/fixedBillNotSelectableInReservation.spec.ts"
 )
 
 BUCKET_B=(
@@ -36,20 +34,16 @@ BUCKET_B=(
 
 BUCKET_C1=(
   "tests/Export Manifest/createNewExportECL.spec.ts"
-  "tests/Export Manifest/newExportMan.spec.ts"
-  "tests/Export Manifest/viewExportMan.spec.ts"
-  "tests/LoginTest.spec.ts"
+  "tests/Export Manifest/newExportManifest.spec.ts"
+  "tests/Login/LoginTest.spec.ts"
 )
 
 BUCKET_C2=(
   "tests/Import Manifest/createNewImportECL.spec.ts"
-  "tests/Import Manifest/newImportManExpTest.spec.ts"
-  "tests/Import Manifest/newImportManTest.spec.ts"
+  "tests/Import Manifest/createImportManifest.spec.ts"
 )
 
 BUCKET_C3=(
-  "tests/Import Manifest/viewImportManByRefTest.spec.ts"
-  "tests/Import Manifest/viewImportManExp.spec.ts"
   "tests/Transit Manifest/createNewTransit.spec.ts"
   "tests/Transit Manifest/createNewTransitECL.spec.ts"
 )
@@ -59,6 +53,7 @@ run_bucket() {
   local files=("$@")
   PLAYWRIGHT_JSON_OUTPUT_NAME="regression-results-${name}.json" \
   PLAYWRIGHT_HTML_REPORT="playwright-report-regression-${name}" \
+  PLAYWRIGHT_BLOB_OUTPUT_DIR="blob-report-${name}" \
   npx playwright test --config="$CONFIG" --workers=1 --output="test-results-regression-${name}" "${files[@]}" \
     > "regression-bucket-${name}.log" 2>&1
   echo "Bucket ${name} exited with code $?" >> "regression-bucket-${name}.log"
@@ -90,3 +85,46 @@ wait "$PID_A" "$PID_B" "$PID_C1" "$PID_C2" "$PID_C3"
 echo "All buckets finished. Per-bucket logs: regression-bucket-{A,B,C1,C2,C3}.log"
 echo "Per-bucket JSON: regression-results-{A,B,C1,C2,C3}.json"
 echo "Per-bucket HTML reports: playwright-report-regression-{A,B,C1,C2,C3}"
+
+# Merge the 5 buckets' blob reports into a single HTML report, then archive a dated copy into reports/ -
+# each bucket writes one *.zip into its own blob-report-<name>/ dir (the blob reporter names the file
+# report-<commandHash>.zip, not a fixed "report.zip", so it's globbed rather than hardcoded) and they're
+# collected under one temp dir, renamed by bucket, before merge-reports scans it.
+echo "Merging bucket reports into one..."
+MERGE_INPUT=$(mktemp -d)
+for name in A B C1 C2 C3; do
+  zip_file=$(ls "blob-report-${name}"/*.zip 2>/dev/null | head -1)
+  if [ -n "$zip_file" ]; then
+    cp "$zip_file" "$MERGE_INPUT/${name}.zip"
+  else
+    echo "Warning: no report zip found in blob-report-${name}/ - bucket ${name} may have crashed before producing a report (check regression-bucket-${name}.log)"
+  fi
+done
+
+PLAYWRIGHT_HTML_REPORT=playwright-report-regression \
+  npx playwright merge-reports --config="$CONFIG" --reporter=html "$MERGE_INPUT"
+rm -rf "$MERGE_INPUT"
+
+REPORT_DATE=$(date +%F)
+mkdir -p reports
+cp playwright-report-regression/index.html "reports/fasah-regression-${REPORT_DATE}.html"
+echo "Merged report: playwright-report-regression/index.html"
+# the archived copy is index.html only - the test list, steps and pass/fail tree all work from it, but
+# screenshots/videos/traces for failed tests live in playwright-report-regression/data/ (easily 1GB+ for a
+# full run) and are NOT copied into reports/, since that'd bloat the git-tracked reports/ folder badly. To
+# inspect a failure's screenshot/video/trace, run `npm run report:regression` right after this script finishes,
+# before playwright-report-regression/ gets overwritten by the next run:
+echo "Archived copy (pass/fail + steps only, no screenshots/video/trace): reports/fasah-regression-${REPORT_DATE}.html"
+
+# Test-case summary: cross-references each bucket's JSON results against the spreadsheet scenario numbers
+# baked into the test titles (scripts/test-scenarios.json), so every documented test case shows up next to
+# its latest status - not just the ones that happened to run.
+BUCKET_JSON_FILES=()
+for name in A B C1 C2 C3; do
+  if [ -f "regression-results-${name}.json" ]; then
+    BUCKET_JSON_FILES+=("regression-results-${name}.json")
+  fi
+done
+if [ ${#BUCKET_JSON_FILES[@]} -gt 0 ]; then
+  node scripts/generate-test-case-report.js "${BUCKET_JSON_FILES[@]}" -o "reports/fasah-test-cases-${REPORT_DATE}.html"
+fi

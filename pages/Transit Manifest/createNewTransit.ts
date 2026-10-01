@@ -206,22 +206,27 @@ export class NewTransitManPage {
       .last();
   }
 
-  //closes any blocking popup/dialog (e.g. license expiration warning) if present:
+  //closes any blocking popup/dialog (e.g. license expiration warning) if present. Delegates to closeAllIfPresent()
+  //rather than a single closeIfPresent(): confirmed live (2026-09-28) that the license-expiry warning and the
+  //newer "الشروط والأحكام" terms popup can be stacked together right after a fresh login, and a single-shot close
+  //leaves one of them still blocking:
   async closeBlockingModalIfPresent(): Promise<void> {
-    return this.modal.closeIfPresent();
+    return this.modal.closeAllIfPresent();
   }
 
   //click on Air Services menu:
   async clickAirServices(): Promise<void> {
     await this.page.waitForLoadState('domcontentloaded');
 
-    await this.page.waitForFunction(
-      () => !document.documentElement.classList.contains('nprogress-busy'),
-      undefined,
-      { timeout: 10_000 }
-    ).catch(() => {
-      console.log('NProgress did not finish, continuing with locator checks');
-    });
+    await this.page
+      .waitForFunction(
+        () => !(globalThis as any).document?.documentElement?.classList.contains('nprogress-busy'),
+        undefined,
+        { timeout: 10_000 }
+      )
+      .catch(() => {
+        console.log('NProgress did not finish, continuing with locator checks');
+      });
 
     await this.closeBlockingModalIfPresent();
 
@@ -231,7 +236,23 @@ export class NewTransitManPage {
     const menuAlreadyOpen = await this.airTransitManifestMenu.isVisible().catch(() => false);
 
     if (!menuAlreadyOpen) {
-      await this.airServicesMenu.click();
+      //a popup (e.g. a welcome/license notice right after a fresh login) can appear between the
+      //closeBlockingModalIfPresent() check above and this click, intercepting it indefinitely (confirmed live,
+      //2026-09-26: 188 retries over 2 minutes before the whole test timed out). Re-check and close right before
+      //clicking, retrying the click itself if a modal was still intercepting it - same fix already applied to
+      //NewImportManPage.clickAirServices():
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        await this.closeBlockingModalIfPresent();
+
+        const clicked = await this.airServicesMenu
+          .click({ timeout: 15_000 })
+          .then(() => true)
+          .catch(() => false);
+
+        if (clicked) {
+          break;
+        }
+      }
     }
   }
 
@@ -240,10 +261,47 @@ export class NewTransitManPage {
     await expect(this.airTransitManifestMenu).toBeVisible();
     await expect(this.airTransitManifestMenu).toBeEnabled();
 
-    await this.airTransitManifestMenu.click();
+    //same modal-intercept risk as clickAirServices() above - retry the click after closing any stray modal:
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      await this.closeBlockingModalIfPresent();
+
+      const clicked = await this.airTransitManifestMenu
+        .click({ timeout: 15_000 })
+        .then(() => true)
+        .catch(() => false);
+
+      if (clicked) {
+        break;
+      }
+    }
   }
 
   //click on Create Air Transit Manifest button:
+  //
+  //KNOWN FLAKY SPOT (as of 2026-09-27): this app stacks each "page" as its own <div class="Layer"> rather than
+  //replacing the previous one, and the create form's whole Layer (confirmed via a live DOM dump the user captured
+  //mid-run: correct structure, correct test-attr, no iframe involved) is appended to the DOM with a highly
+  //variable delay after this click - sometimes near-instant (confirmed live by the user watching it appear right
+  //away), sometimes it never completes within any reasonable wait at all. The form renders in STAGES, confirmed
+  //via live element counts: the outer #manifest-form container can exist while the destination-country <input>
+  //inside it still doesn't (0 matches for its test-attr even once #manifest-form's own count was 1) - so waiting
+  //on the outer container's presence wouldn't help either; the inner field's own delay is independent and is what
+  //actually needs to be waited on, and its delay is the unpredictable part.
+  //
+  //Ruled out as fixes - do not re-attempt without new evidence:
+  //  - Waiting longer for the field to attach: tried 40s and even 90s (on top of AutocompleteInput.select()'s own
+  //    25s afterward, so 115s+ total) - still failed outright on some attempts, meaning this isn't just "slow and
+  //    would eventually succeed with enough patience" - some attempts are a genuine dead end within that page
+  //    load, not a slow-but-recoverable one, so no wait duration can be relied on to fix it.
+  //  - Waiting for window.fasah.air_manifest_transit.createNewManifest to exist before clicking (it already did).
+  //  - Clicking the button a second time, or reloading + re-navigating and retrying up to 3 times.
+  //  - English UI instead of Arabic (a manual English-UI click worked fine either way).
+  //  - Headless vs. headed, and a larger (1920x1080) viewport in headless - no consistent effect either way.
+  //  - Dispatching the click via native JS (element.click() through evaluate()) instead of Playwright's synthetic
+  //    mouse click - failed identically every time, ruling out the click mechanism itself as the cause.
+  //
+  //Since no wait duration reliably works, the mitigation is a whole-test retry (fresh login + fresh page load,
+  //not a retry inside this one page load) via test.describe.configure({ retries: 1 }) in the test file:
   async clickCreateAirTransitManifest(): Promise<void> {
     await expect(this.createAirTransitManifestButton).toBeVisible({ timeout: 15_000 });
     await expect(this.createAirTransitManifestButton).toBeEnabled();

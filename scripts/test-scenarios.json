@@ -1,0 +1,714 @@
+{
+  "Air Import Manifest": [
+    {
+      "number": 1,
+      "scenario": "Save Import Manifest with header only as Draft",
+      "priority": 1
+    },
+    {
+      "number": 2,
+      "scenario": "View Import Manifest with header",
+      "priority": 1
+    },
+    {
+      "number": 3,
+      "scenario": "Edit Import Manifest with header",
+      "priority": 1
+    },
+    {
+      "number": 4,
+      "scenario": "Submit Import Manifest with header",
+      "priority": 1
+    },
+    {
+      "number": 5,
+      "scenario": "Save Import Manifest with one Completed Normal Import Bill",
+      "priority": 1
+    },
+    {
+      "number": 6,
+      "scenario": "View Import Manifest with one Completed Normal Import Bill",
+      "priority": 1
+    },
+    {
+      "number": 7,
+      "scenario": "Edit Import Manifest with one Completed Normal Import Bill",
+      "priority": 1
+    },
+    {
+      "number": 8,
+      "scenario": "Submit Import Manifest with one Completed Normal  Import Bill",
+      "priority": 1
+    },
+    {
+      "number": 9,
+      "scenario": "Submit Import Manifest with one Normal Waiting  Import Bill",
+      "priority": 1
+    },
+    {
+      "number": 10,
+      "scenario": "Save Import Manifest with one Completed Express mail Import Bill",
+      "priority": 1
+    },
+    {
+      "number": 11,
+      "scenario": "View Import Manifest with one Completed Express mail Import Bill",
+      "priority": 1
+    },
+    {
+      "number": 12,
+      "scenario": "Edit Import Manifest with one Completed Express mail Import Bill",
+      "priority": 1
+    },
+    {
+      "number": 13,
+      "scenario": "Submit Import Manifest with one Completed Express mail  Import Bill",
+      "priority": 1
+    },
+    {
+      "number": 14,
+      "scenario": "Submit Import Manifest with one Express mail  Waiting  Import Bill",
+      "priority": 1
+    },
+    {
+      "number": 15,
+      "scenario": "Save Import Manifest with one Completed Transit  Bill",
+      "priority": 1
+    },
+    {
+      "number": 16,
+      "scenario": "View Import Manifest with one Completed Transit Bill",
+      "priority": 1
+    },
+    {
+      "number": 17,
+      "scenario": "Edit Import Manifest with one Completed Transit Bill",
+      "priority": 1
+    },
+    {
+      "number": 18,
+      "scenario": "Submit Import Manifest with one Completed Transit Bill",
+      "priority": 1
+    },
+    {
+      "number": 19,
+      "scenario": "Save Manifest with more than one Bill",
+      "priority": 1
+    },
+    {
+      "number": 20,
+      "scenario": "View Manifest with more than one Bill",
+      "priority": 1
+    },
+    {
+      "number": 21,
+      "scenario": "Edit Manifest with more than one Bill",
+      "priority": 1
+    },
+    {
+      "number": 22,
+      "scenario": "Submit Manifest with more than one Bill",
+      "priority": 1
+    },
+    {
+      "number": 23,
+      "scenario": "Upload Manifest with 999 Bills",
+      "priority": 3
+    },
+    {
+      "number": 24,
+      "scenario": "Submit Manifest with 999 Bills",
+      "priority": 3
+    },
+    {
+      "number": 25,
+      "scenario": "Submit All information ECL with changes in header",
+      "priority": 1
+    },
+    {
+      "number": 26,
+      "scenario": "Create All information ECL with Updated Existing Bill",
+      "priority": 1
+    },
+    {
+      "number": 27,
+      "scenario": "View All information ECL with Updated Existing Bill",
+      "priority": 1
+    },
+    {
+      "number": 28,
+      "scenario": "Submit All information ECL with Updated Existing Bill",
+      "priority": 1
+    },
+    {
+      "number": 29,
+      "scenario": "Create All information ECL with Deleted Existing Bill",
+      "priority": 1
+    },
+    {
+      "number": 30,
+      "scenario": "View All information ECL with Deleted Existing Bill",
+      "priority": 1
+    },
+    {
+      "number": 31,
+      "scenario": "Edit All information ECL with Deleted Existing Bill",
+      "priority": 1
+    },
+    {
+      "number": 32,
+      "scenario": "Submit All information ECL with Deleted Existing Bill",
+      "priority": 1
+    },
+    {
+      "number": 33,
+      "scenario": "Create All information ECL with adding new completed Normal Bill",
+      "priority": 1
+    },
+    {
+      "number": 34,
+      "scenario": "View All information ECL with adding new completed Normal Bill",
+      "priority": 1
+    },
+    {
+      "number": 35,
+      "scenario": "Edit All information ECL with adding new completed Normal Bill",
+      "priority": 1
+    },
+    {
+      "number": 36,
+      "scenario": "Submit All information ECL with adding new completed Normal Bill",
+      "priority": 1
+    },
+    {
+      "number": 37,
+      "scenario": "Submit All information ECL with adding new Waiting Normal Bill",
+      "priority": 1
+    },
+    {
+      "number": 38,
+      "scenario": "Submit All information ECL with adding new Transit  Bill",
+      "priority": 1
+    },
+    {
+      "number": 39,
+      "scenario": "Add Bills to Waiting Manifest",
+      "priority": 1
+    },
+    {
+      "number": 40,
+      "scenario": "Create All information ECL with Header Update, MAWB Add/Update/Delete, Arrived Bill Add/Update/Delete, Item Add/Update/Delete, and Warehouse Add/Update/Delete",
+      "priority": 2
+    },
+    {
+      "number": 41,
+      "scenario": "View All information ECL with Header Update, MAWB Add/Update/Delete, Arrived Bill Add/Update/Delete, Item Add/Update/Delete, and Warehouse Add/Update/Delete",
+      "priority": 2
+    },
+    {
+      "number": 42,
+      "scenario": "Edit All information ECL with Header Update, MAWB Add/Update/Delete, Arrived Bill Add/Update/Delete, Item Add/Update/Delete, and Warehouse Add/Update/Delete",
+      "priority": 2
+    },
+    {
+      "number": 43,
+      "scenario": "Submit  All information ECL with Header Update, MAWB Add/Update/Delete, Arrived Bill Add/Update/Delete, Item Add/Update/Delete, and Warehouse Add/Update/Delete",
+      "priority": 2
+    },
+    {
+      "number": 44,
+      "scenario": "Create \"Edit owner information\" ECL",
+      "priority": 1
+    },
+    {
+      "number": 45,
+      "scenario": "View \"Edit owner information\" ECL",
+      "priority": 1
+    },
+    {
+      "number": 46,
+      "scenario": "Edit  \"Edit owner information\" ECL",
+      "priority": 1
+    },
+    {
+      "number": 47,
+      "scenario": "Submit \"Edit owner information\" ECL",
+      "priority": 1
+    },
+    {
+      "number": 48,
+      "scenario": "Create \"Edit Warehouse information\" ECL - Edit one warehouse",
+      "priority": 2
+    },
+    {
+      "number": 49,
+      "scenario": "Create \"Edit Warehouse information\" ECL - Edit more than one warehouse",
+      "priority": 1
+    },
+    {
+      "number": 50,
+      "scenario": "View \"Edit Warehouse information\" ECL - Edit more than one warehouse",
+      "priority": 1
+    },
+    {
+      "number": 51,
+      "scenario": "Edit  Warehouse information ECL - Edit more than one warehouse",
+      "priority": 1
+    },
+    {
+      "number": 52,
+      "scenario": "Submit \"Edit Warehouse information\" ECL - Edit more than one warehouse",
+      "priority": 1
+    }
+  ],
+  "Air Export Manifest": [
+    {
+      "number": 1,
+      "scenario": "Save Export Manifest with header only as Draft",
+      "priority": 1
+    },
+    {
+      "number": 2,
+      "scenario": "View Export Manifest with header",
+      "priority": 1
+    },
+    {
+      "number": 3,
+      "scenario": "Edit Export Manifest with header",
+      "priority": 1
+    },
+    {
+      "number": 4,
+      "scenario": "Submit Export Manifest with header",
+      "priority": 1
+    },
+    {
+      "number": 5,
+      "scenario": "Submit Export Manifest with one Export Bill",
+      "priority": 1
+    },
+    {
+      "number": 6,
+      "scenario": "Save Export Manifest with multiple Export Bills",
+      "priority": 1
+    },
+    {
+      "number": 7,
+      "scenario": "View Export Manifest with multiple Export Bills",
+      "priority": 1
+    },
+    {
+      "number": 8,
+      "scenario": "Edit Export Manifest with multiple Export Bills",
+      "priority": 1
+    },
+    {
+      "number": 9,
+      "scenario": "Submit Export Manifest with multiple Export Bills",
+      "priority": 1
+    },
+    {
+      "number": 10,
+      "scenario": "Submit Air Export Manifest ECL with change in header",
+      "priority": 1
+    },
+    {
+      "number": 11,
+      "scenario": "Submit Air Export Manifest ECL with Editing existing Bill",
+      "priority": 1
+    },
+    {
+      "number": 12,
+      "scenario": "Submit Air Export Manifest ECL with Deleted Existing Bill",
+      "priority": 1
+    },
+    {
+      "number": 13,
+      "scenario": "Submit Air Export Manifest ECL with Added Export Bill",
+      "priority": 1
+    },
+    {
+      "number": 14,
+      "scenario": "Add Bills to Waiting Manifest",
+      "priority": 1
+    },
+    {
+      "number": 15,
+      "scenario": "Create Air Export Manifest ECL with Edit Header Update, Export Bill Add/Update/Delete",
+      "priority": 2
+    },
+    {
+      "number": 16,
+      "scenario": "View Air Export Manifest ECL with Header Update, Export Bill Add/Update/Delete",
+      "priority": 2
+    },
+    {
+      "number": 17,
+      "scenario": "Edit Air Export Manifest ECL with Header Update, Export Bill Add/Update/Delete",
+      "priority": 2
+    },
+    {
+      "number": 18,
+      "scenario": "Submit Air Export Manifest ECL withHeader Update, Export Bill Add/Update/Delete",
+      "priority": 2
+    }
+  ],
+  "Air Transit Manifest": [
+    {
+      "number": 1,
+      "scenario": "Create Transit Manifest with header only",
+      "priority": 1
+    },
+    {
+      "number": 2,
+      "scenario": "Create Transit Manifest with one Bill retrieved from system",
+      "priority": 1
+    },
+    {
+      "number": 3,
+      "scenario": "Create Transit Manifest with one Bill retrieved from ZATCA",
+      "priority": 1
+    },
+    {
+      "number": 4,
+      "scenario": "Create Transit Manifest with multiple Bills",
+      "priority": 1
+    },
+    {
+      "number": 5,
+      "scenario": "View Transit Manifest with multiple Bills",
+      "priority": 1
+    },
+    {
+      "number": 6,
+      "scenario": "Edit Transit Manifest with multiple Bills",
+      "priority": 1
+    },
+    {
+      "number": 7,
+      "scenario": "Submit Transit Manifest with multiple Bills",
+      "priority": 1
+    },
+    {
+      "number": 8,
+      "scenario": "Create Transit Manifest with Bill That Does Not Exist",
+      "priority": 1
+    },
+    {
+      "number": 9,
+      "scenario": "Create Transit Manifest with Bill with Weight and Quantity Exceeding Allowed Valuesl",
+      "priority": 1
+    },
+    {
+      "number": 10,
+      "scenario": "Create Air Transit Manifest ECL with Edit header only",
+      "priority": 1
+    },
+    {
+      "number": 11,
+      "scenario": "Create Air Transit Manifest ECL with New transit Bill retrieved from system",
+      "priority": 1
+    },
+    {
+      "number": 12,
+      "scenario": "Create Air Transit Manifest ECL  with New transit Bill retrieved from ZATCA",
+      "priority": 1
+    },
+    {
+      "number": 13,
+      "scenario": "Create Air Transit Manifest ECL  with Updated transit Bill",
+      "priority": 1
+    },
+    {
+      "number": 14,
+      "scenario": "Create Air Transit Manifest ECL  with Deleted transit Bill",
+      "priority": 1
+    },
+    {
+      "number": 15,
+      "scenario": "Create Air Transit Manifest ECL with Header Update and Transit Bill Add/Update/Delete",
+      "priority": 1
+    },
+    {
+      "number": 16,
+      "scenario": "View Air Transit Manifest ECL with Header Update and Transit Bill Add/Update/Delete",
+      "priority": 1
+    },
+    {
+      "number": 17,
+      "scenario": "Edit Air Transit Manifest ECL Header Update and Transit Bill Add/Update/Delete",
+      "priority": 1
+    },
+    {
+      "number": 18,
+      "scenario": "Submit Air Transit Manifest ECL Header Update and Transit Bill Add/Update/Delete",
+      "priority": 1
+    },
+    {
+      "number": 19,
+      "scenario": "Create Transit Manifest ECL with Carrier does not Exist",
+      "priority": 1
+    },
+    {
+      "number": 20,
+      "scenario": "Submit Transit Manifest ECL with Bill with Bill with Weight and Quantity Exceeding Allowed Values",
+      "priority": 1
+    }
+  ],
+  "Air Delivery Order": [
+    {
+      "number": 1,
+      "scenario": "Create DEO without FFW and with a valid importer",
+      "priority": 1
+    },
+    {
+      "number": 2,
+      "scenario": "View DEO without FFW and with a valid importer",
+      "priority": 1
+    },
+    {
+      "number": 3,
+      "scenario": "Edit DEO without FFW and with a valid importer",
+      "priority": 1
+    },
+    {
+      "number": 4,
+      "scenario": "Submit DEO without FFW and with a valid importer",
+      "priority": 1
+    },
+    {
+      "number": 5,
+      "scenario": "Submit DEO without FFW and with an invalid importer",
+      "priority": 2
+    },
+    {
+      "number": 6,
+      "scenario": "Create DEO with a valid FFW",
+      "priority": 1
+    },
+    {
+      "number": 7,
+      "scenario": "View DEO with a valid FFW",
+      "priority": 1
+    },
+    {
+      "number": 8,
+      "scenario": "Edit DEO with a valid FFW",
+      "priority": 1
+    },
+    {
+      "number": 9,
+      "scenario": "Submit DEO with a valid FFW",
+      "priority": 1
+    },
+    {
+      "number": 10,
+      "scenario": "Submit DEO with an invalid FFW",
+      "priority": 2
+    },
+    {
+      "number": 11,
+      "scenario": "Cancel delivery order",
+      "priority": 1
+    },
+    {
+      "number": 12,
+      "scenario": "Print Delivery order",
+      "priority": 2
+    },
+    {
+      "number": 13,
+      "scenario": "Download Delivery order",
+      "priority": 2
+    }
+  ],
+  "FFW": [
+    {
+      "number": 1,
+      "scenario": "Accept Assigned Request",
+      "priority": 1
+    },
+    {
+      "number": 2,
+      "scenario": "Reject Assigned Request",
+      "priority": 1
+    },
+    {
+      "number": 3,
+      "scenario": "Withdraw Assigned Request",
+      "priority": 1
+    },
+    {
+      "number": 4,
+      "scenario": "Accept Withdrawal Request",
+      "priority": 1
+    },
+    {
+      "number": 5,
+      "scenario": "Reject Withdrawal Request",
+      "priority": 1
+    },
+    {
+      "number": 6,
+      "scenario": "View Rejection Reason for Assigned Request",
+      "priority": 1
+    },
+    {
+      "number": 7,
+      "scenario": "View Rejection Reason for Withdraw Assigned Request",
+      "priority": 1
+    },
+    {
+      "number": 8,
+      "scenario": "Create a Bill Reservation Request for a valid bill",
+      "priority": 1
+    },
+    {
+      "number": 9,
+      "scenario": "View Bill Reservation Request for a valid bill",
+      "priority": 1
+    },
+    {
+      "number": 10,
+      "scenario": "Edit Bill Reservation Request for a valid bill",
+      "priority": 1
+    },
+    {
+      "number": 11,
+      "scenario": "Submit Bill Reservation Request for a valid bill",
+      "priority": 1
+    },
+    {
+      "number": 12,
+      "scenario": "Create Bill Reservation Request for a Bill Linked to a DEO",
+      "priority": 1
+    },
+    {
+      "number": 13,
+      "scenario": "Create Bill Reservation Request for a Bill Linked to a Declaration",
+      "priority": 1
+    },
+    {
+      "number": 14,
+      "scenario": "Submit One HAWB containing all weights and quantities with one Item and one warehouse",
+      "priority": 1
+    },
+    {
+      "number": 15,
+      "scenario": "Submit multiple HAWB containing up to 110% of total original weights and quantities",
+      "priority": 2
+    },
+    {
+      "number": 16,
+      "scenario": "Submit multiple HAWB containing at minimum 90 % of total original weights and quantities",
+      "priority": 2
+    },
+    {
+      "number": 17,
+      "scenario": "Submit One HAWB containing all weights and quantities with multiple Items and warehouses",
+      "priority": 1
+    },
+    {
+      "number": 18,
+      "scenario": "Create Multiple HAWB with multiple items and warehouses for each HAWB",
+      "priority": 1
+    },
+    {
+      "number": 19,
+      "scenario": "View Multiple HAWB with multiple items and warehouses for each HAWB",
+      "priority": 1
+    },
+    {
+      "number": 20,
+      "scenario": "Edit Multiple HAWB with multiple items and warehouses for each HAWB",
+      "priority": 1
+    },
+    {
+      "number": 21,
+      "scenario": "Submit Multiple HAWB with multiple items and warehouses for each HAWB",
+      "priority": 1
+    },
+    {
+      "number": 22,
+      "scenario": "Create DEO with valid importer",
+      "priority": 1
+    },
+    {
+      "number": 23,
+      "scenario": "View DEO with valid importer",
+      "priority": 1
+    },
+    {
+      "number": 24,
+      "scenario": "Edit  DEO with valid importer",
+      "priority": 1
+    },
+    {
+      "number": 25,
+      "scenario": "Submit DEO with valid importer",
+      "priority": 1
+    },
+    {
+      "number": 26,
+      "scenario": "Submit DEO with invalid importer",
+      "priority": 2
+    },
+    {
+      "number": 27,
+      "scenario": "Submit DEO without importer",
+      "priority": 2
+    }
+  ],
+  "Linking Express Mail Bills": [
+    {
+      "number": 1,
+      "scenario": "Create a request to link the express mail bills with invalid bill",
+      "priority": 1
+    },
+    {
+      "number": 2,
+      "scenario": "Create a request to link the express mail bills with valid bill",
+      "priority": 1
+    },
+    {
+      "number": 3,
+      "scenario": "View Assignment Request from shipping agent side",
+      "priority": 1
+    },
+    {
+      "number": 4,
+      "scenario": "View Assignment Request from express mail side",
+      "priority": 1
+    },
+    {
+      "number": 5,
+      "scenario": "Link Request with one manifest",
+      "priority": 1
+    },
+    {
+      "number": 6,
+      "scenario": "Link Request with two manifests",
+      "priority": 2
+    },
+    {
+      "number": 7,
+      "scenario": "Link Request with three manifests",
+      "priority": 1
+    },
+    {
+      "number": 8,
+      "scenario": "Link Request with more than three manifests",
+      "priority": 1
+    },
+    {
+      "number": 9,
+      "scenario": "View Virtual manifest after linking",
+      "priority": 1
+    },
+    {
+      "number": 10,
+      "scenario": "View Actual manifest after linking",
+      "priority": 1
+    }
+  ]
+}

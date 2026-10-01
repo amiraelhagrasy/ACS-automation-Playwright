@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Fasah Test Case Report</title>
+<style>
+  body { font-family: -apple-system, Segoe UI, Arial, sans-serif; margin: 0; padding: 24px; background: #f7f7f8; color: #1a1a1a; }
+  h1 { margin: 0 0 4px; }
+  .meta { color: #666; font-size: 13px; margin-bottom: 20px; }
+  .summary { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+  .stat { background: #fff; border: 1px solid #e2e2e2; border-radius: 8px; padding: 10px 16px; min-width: 110px; }
+  .stat .n { font-size: 22px; font-weight: 700; }
+  .stat .l { font-size: 12px; color: #666; }
+  h2 { margin-top: 32px; border-bottom: 2px solid #e2e2e2; padding-bottom: 6px; }
+  table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,.05); }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #eee; font-size: 13px; vertical-align: top; }
+  th { background: #fafafa; font-weight: 600; color: #444; }
+  td.num { font-weight: 700; white-space: nowrap; }
+  td.test-title { color: #333; }
+  td.ref { color: #333; white-space: nowrap; font-size: 12px; }
+  td.duration { color: #666; white-space: nowrap; font-size: 12px; }
+  td.media { white-space: nowrap; font-size: 12px; }
+  td.media a { color: #1a5fb4; text-decoration: none; }
+  td.media a:hover { text-decoration: underline; }
+  .retry-note { color: #a5690a; font-size: 11px; white-space: nowrap; }
+  .muted { color: #bbb; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+  .badge-pass { background: #e3f9e5; color: #1e7d2b; }
+  .badge-fail { background: #fde8e8; color: #c81e1e; }
+  .badge-flaky { background: #fff4e0; color: #a5690a; }
+  .badge-skip { background: #eef0f2; color: #666; }
+  .badge-none { background: #f3f3f3; color: #999; }
+  tr.row-failed { background: #fffafa; }
+</style>
+</head>
+<body>
+  <h1>Fasah Test Case Report</h1>
+  <div class="meta">Generated 2026-09-29T09:55:31.655Z from: .report-tmp/bulk.json</div>
+  <div class="summary">
+    <div class="stat"><div class="n">1m 9s</div><div class="l">Total duration</div></div>
+    <div class="stat"><div class="n">1</div><div class="l">Passed</div></div>
+    <div class="stat"><div class="n">0</div><div class="l">Failed</div></div>
+    <div class="stat"><div class="n">0</div><div class="l">Flaky</div></div>
+    <div class="stat"><div class="n">0</div><div class="l">Skipped</div></div>
+    <div class="stat"><div class="n">0</div><div class="l">Not automated</div></div>
+  </div>
+  
+      <h2>Air Import Manifest</h2>
+      <table>
+        <thead><tr><th>#</th><th>Scenario</th><th>Reference #</th><th>Message ID</th><th>Duration</th><th>Status</th><th>Media</th></tr></thead>
+        <tbody>
+        <tr class="row-passed">
+          <td class="num">#23</td>
+          <td>Upload Manifest with 999 Bills</td>
+          <td class="ref"><span class="muted">-</span></td>
+          <td class="ref"><span class="muted">-</span></td>
+          <td class="duration">33.8s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+          <td class="media"><span class="muted">-</span></td>
+        </tr></tbody>
+      </table>
+  
+</body>
+</html>

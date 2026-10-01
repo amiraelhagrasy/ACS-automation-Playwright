@@ -1,6 +1,5 @@
 import { expect, Locator, Page } from '@playwright/test';
-import { ModalComponent } from '../../components/ModalComponent';
-import { AutocompleteInput } from '../../components/AutocompleteInput';
+import { ViewManifestPage } from '../Import Manifest/viewManifestPage';
 
 export type NewExportManifestData = {
     exportPort: string;
@@ -12,11 +11,10 @@ export type NewExportManifestData = {
     shippingAgentNumber: string;
 };
 
-export class NewExportManPage {
-    private readonly page: Page;
-    private readonly modal: ModalComponent;
-    private readonly autocomplete: AutocompleteInput;
-
+//genuinely specific to creating/submitting a NEW Export air manifest - the manifest-type-agnostic view/search/
+//status/master-bill/house-bill methods (and waitForPageIdle()'s session-timeout handling) live in
+//ViewManifestPage, which this extends, same as NewImportManPage:
+export class NewExportManPage extends ViewManifestPage {
     private readonly airServicesMenu: Locator;
     private readonly airExportManifestMenu: Locator;
     private readonly createAirExportManifestButton: Locator;
@@ -44,9 +42,7 @@ export class NewExportManPage {
     private readonly messageId: Locator;
 
     constructor(page: Page) {
-        this.page = page;
-        this.modal = new ModalComponent(page);
-        this.autocomplete = new AutocompleteInput(page);
+        super(page);
 
         this.airServicesMenu = page.getByText('خدمات الطيران');
         this.airExportManifestMenu = page.locator('[package="air_manifest_export"]');
@@ -93,18 +89,8 @@ export class NewExportManPage {
     //click on Air Services menu:
     async clickAirServices(): Promise<void> {
         await this.page.waitForLoadState('domcontentloaded');
-
-        await this.page
-            .waitForFunction(
-                () => !document.documentElement.classList.contains('nprogress-busy'),
-                undefined,
-                { timeout: 10_000 }
-            )
-            .catch(() => {
-                console.log('NProgress did not finish, continuing with locator checks');
-            });
-
-        await this.modal.closeIfPresent();
+        await this.waitForPageIdle();
+        await this.closeBlockingModalIfPresent();
 
         await expect(this.airServicesMenu).toBeVisible({ timeout: 20_000 });
         await expect(this.airServicesMenu).toBeEnabled();
@@ -112,7 +98,21 @@ export class NewExportManPage {
         const menuAlreadyOpen = await this.airExportManifestMenu.isVisible().catch(() => false);
 
         if (!menuAlreadyOpen) {
-            await this.airServicesMenu.click();
+            //a popup (e.g. the license-expiry notice) can appear between the closeBlockingModalIfPresent() check
+            //above and this click - re-check and close right before clicking, retrying the click itself if a
+            //modal was still intercepting it (same pattern as NewImportManPage.clickAirServices()):
+            for (let attempt = 1; attempt <= 3; attempt++) {
+                await this.closeBlockingModalIfPresent();
+
+                const clicked = await this.airServicesMenu
+                    .click({ timeout: 15_000 })
+                    .then(() => true)
+                    .catch(() => false);
+
+                if (clicked) {
+                    break;
+                }
+            }
         }
     }
 
@@ -121,7 +121,20 @@ export class NewExportManPage {
         await expect(this.airExportManifestMenu).toBeVisible();
         await expect(this.airExportManifestMenu).toBeEnabled();
 
-        await this.airExportManifestMenu.click();
+        //a stray popup can appear while this runs repeatedly inside a status-polling loop - same pattern as
+        //NewImportManPage.clickAirImportManifest():
+        for (let attempt = 1; attempt <= 3; attempt++) {
+            await this.closeBlockingModalIfPresent();
+
+            const clicked = await this.airExportManifestMenu
+                .click({ timeout: 15_000 })
+                .then(() => true)
+                .catch(() => false);
+
+            if (clicked) {
+                break;
+            }
+        }
     }
 
     //click on Create Air Export Manifest button:
@@ -132,20 +145,12 @@ export class NewExportManPage {
         await this.createAirExportManifestButton.click();
     }
 
-    protected async fillDate(input: Locator, date: string): Promise<void> {
-        await expect(input).toBeVisible();
-
-        await input.click();
-        await input.fill(date);
-        await input.press('Tab');
-    }
-
     async fillExportPort(exportPort: string): Promise<void> {
-        await this.autocomplete.select(this.exportPortInput, exportPort);
+        await this.selectAutocompleteOption(this.exportPortInput, exportPort);
     }
 
     async fillTransportCompany(transportCompany: string): Promise<void> {
-        await this.autocomplete.select(this.transportCompanyInput, transportCompany);
+        await this.selectAutocompleteOption(this.transportCompanyInput, transportCompany);
     }
 
     async fillFlightNumber(flightNumber: string): Promise<void> {
@@ -161,7 +166,7 @@ export class NewExportManPage {
     //the "رقم وكيل الشحن" list isn't filtered by the typed value - it always shows the full list of agents, so pick
     //the first visible result instead of matching on text:
     async fillShippingAgentNumber(shippingAgentNumber: string): Promise<void> {
-        await this.autocomplete.selectFirst(this.shippingAgentNumberInput, shippingAgentNumber);
+        await this.selectFirstAutocompleteOption(this.shippingAgentNumberInput, shippingAgentNumber);
     }
 
     async fillManifestForm(data: NewExportManifestData): Promise<void> {

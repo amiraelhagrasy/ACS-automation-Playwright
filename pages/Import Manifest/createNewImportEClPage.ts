@@ -1,22 +1,38 @@
 import { expect } from '@playwright/test';
-import { ViewImportManifestPage } from './viewImportManByRefPage';
+import { ViewManifestPage } from './viewManifestPage';
 
 //page object for the ECL (خطاب تعديل إلكتروني) flow on an accepted manifest:
 //  1) create the ECL and edit its header
 //  2) view the opened ECL letter (read its number)
 //  3) save/submit it
 //  4) poll its status until it becomes مقبول
-//reuses all shared search/status/view methods from ViewImportManifestPage:
-export class CreateNewEclPage extends ViewImportManifestPage {
+//reuses all shared search/status/view methods from ViewManifestPage - it never touches Import's manifest-creation
+//methods (fillManifestForm, clickAirImportManifest, etc.), so it doesn't need NewImportManPage itself; test files
+//that need both construct a separate newImportManPage instance alongside this one:
+export class CreateNewEclPage extends ViewManifestPage {
 
     // ---- 1) create the ECL ----
 
-    //clicks "إنشاء خطاب تعديل إلكتروني" on the manifest's header screen:
+    //clicks "إنشاء خطاب تعديل إلكتروني" on the manifest's header screen. A manifest's first ECL is free; every
+    //ECL after that on the SAME manifest pops a "رسالة من فسح" confirmation ("a previous ECL exists for this
+    //document, a fee will apply for the new one, continue?") with نعم/لا buttons before the type-selection
+    //screen appears - so this confirms it (نعم) whenever it shows up, and no-ops otherwise for a manifest's
+    //first (free) ECL:
     async clickCreateElectronicAmendmentLetterButton(): Promise<void> {
         const button = this.page.getByRole('button', { name: 'إنشاء خطاب تعديل إلكتروني' });
 
         await this.waitForPageIdle();
         await button.click();
+
+        const confirmPaidEclButton = this.page.getByRole('button', { name: 'نعم', exact: true });
+        const paidEclDialogShown = await confirmPaidEclButton
+            .waitFor({ state: 'visible', timeout: 5_000 })
+            .then(() => true)
+            .catch(() => false);
+
+        if (paidEclDialogShown) {
+            await confirmPaidEclButton.click();
+        }
     }
 
     //selects "نوع خطاب التعديل الإلكتروني" (ECL type). value: '1' = تعديل جميع البيانات, '2' = تعديل معلومات المالك, '3' = تعديل معلومات المستودع.
@@ -81,7 +97,7 @@ export class CreateNewEclPage extends ViewImportManifestPage {
 
     //clicks "تقديم الطلب" to actually submit the owner-info ECL (saving alone only keeps it as مسودة). Unlike the
     //"تقديم الطلب" button on the master-bill wizard's final step (which has data-i18n="submitButtonText", matched
-    //by clickSaveButton()), this one has no data-i18n attribute at all, so it needs its own exact-text locator:
+    //by clickSubmitButton()), this one has no data-i18n attribute at all, so it needs its own exact-text locator:
     async clickSubmitRequestButton(): Promise<void> {
         const button = this.page.getByRole('button', { name: 'تقديم الطلب', exact: true });
 

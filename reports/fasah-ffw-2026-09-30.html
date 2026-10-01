@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Fasah Test Case Report</title>
+<style>
+  body { font-family: -apple-system, Segoe UI, Arial, sans-serif; margin: 0; padding: 24px; background: #f7f7f8; color: #1a1a1a; }
+  h1 { margin: 0 0 4px; }
+  .meta { color: #666; font-size: 13px; margin-bottom: 20px; }
+  .summary { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+  .stat { background: #fff; border: 1px solid #e2e2e2; border-radius: 8px; padding: 10px 16px; min-width: 110px; }
+  .stat .n { font-size: 22px; font-weight: 700; }
+  .stat .l { font-size: 12px; color: #666; }
+  h2 { margin-top: 32px; border-bottom: 2px solid #e2e2e2; padding-bottom: 6px; }
+  table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,.05); }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #eee; font-size: 13px; vertical-align: top; }
+  th { background: #fafafa; font-weight: 600; color: #444; }
+  td.num { font-weight: 700; white-space: nowrap; }
+  td.test-title { color: #333; }
+  td.ref { color: #333; white-space: nowrap; font-size: 12px; }
+  td.duration { color: #666; white-space: nowrap; font-size: 12px; }
+  td.media { white-space: nowrap; font-size: 12px; }
+  td.media a { color: #1a5fb4; text-decoration: none; }
+  td.media a:hover { text-decoration: underline; }
+  .retry-note { color: #a5690a; font-size: 11px; white-space: nowrap; }
+  .muted { color: #bbb; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+  .badge-pass { background: #e3f9e5; color: #1e7d2b; }
+  .badge-fail { background: #fde8e8; color: #c81e1e; }
+  .badge-flaky { background: #fff4e0; color: #a5690a; }
+  .badge-skip { background: #eef0f2; color: #666; }
+  .badge-none { background: #f3f3f3; color: #999; }
+  tr.row-failed { background: #fffafa; }
+</style>
+</head>
+<body>
+  <h1>Fasah Test Case Report</h1>
+  <div class="meta">Generated 2026-09-30T14:16:25.461Z from: .report-tmp/ffw.json</div>
+  <div class="summary">
+    <div class="stat"><div class="n">12m 31s</div><div class="l">Total duration</div></div>
+    <div class="stat"><div class="n">6</div><div class="l">Passed</div></div>
+    <div class="stat"><div class="n">4</div><div class="l">Failed</div></div>
+    <div class="stat"><div class="n">0</div><div class="l">Flaky</div></div>
+    <div class="stat"><div class="n">9</div><div class="l">Skipped</div></div>
+    <div class="stat"><div class="n">0</div><div class="l">Not automated</div></div>
+  </div>
+  
+      <h2>FFW</h2>
+      <table>
+        <thead><tr><th>#</th><th>Scenario</th><th>Reference #</th><th>Message ID</th><th>Duration</th><th>Status</th><th>Media</th></tr></thead>
+        <tbody>
+        <tr class="row-passed">
+          <td class="num">#8</td>
+          <td>Create a Bill Reservation Request for a valid bill</td>
+          <td class="ref">20260930480346</td>
+          <td class="ref">SAU20260930366051</td>
+          <td class="duration">316ms</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+          <td class="media"><span class="muted">-</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#9</td>
+          <td>View Bill Reservation Request for a valid bill</td>
+          <td class="ref">20260930480346</td>
+          <td class="ref">SAU20260930366051</td>
+          <td class="duration">2.3s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+          <td class="media"><span class="muted">-</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#10</td>
+          <td>Edit Bill Reservation Request for a valid bill</td>
+          <td class="ref">20260930480346</td>
+          <td class="ref">SAU20260930366051</td>
+          <td class="duration">2.0s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+          <td class="media"><span class="muted">-</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#11</td>
+          <td>Submit Bill Reservation Request for a valid bill</td>
+          <td class="ref">20260930480346</td>
+          <td class="ref">SAU20260930366051</td>
+          <td class="duration">3.4s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+          <td class="media"><span class="muted">-</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#12</td>
+          <td>Create Bill Reservation Request for a Bill Linked to a DEO</td>
+          <td class="ref">20260930480344</td>
+          <td class="ref">SAU20260930366053</td>
+          <td class="duration">4m 37s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+          <td class="media"><span class="muted">-</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#13</td>
+          <td>Create Bill Reservation Request for a Bill Linked to a Declaration</td>
+          <td class="ref"><span class="muted">-</span></td>
+          <td class="ref"><span class="muted">-</span></td>
+          <td class="duration">38.9s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+          <td class="media"><span class="muted">-</span></td>
+        </tr>
+        <tr class="row-skipped">
+          <td class="num">#15</td>
+          <td>Submit multiple HAWB containing up to 110% of total original weights and quantities</td>
+          <td class="ref"><span class="muted">-</span></td>
+          <td class="ref"><span class="muted">-</span></td>
+          <td class="duration"><span class="muted">-</span></td>
+          <td><span class="badge badge-skip">Skipped</span></td>
+          <td class="media"><span class="muted">-</span></td>
+        </tr>
+        <tr class="row-skipped">
+          <td class="num">#16</td>
+          <td>Submit multiple HAWB containing at minimum 90 % of total original weights and quantities</td>
+          <td class="ref"><span class="muted">-</span></td>
+          <td class="ref"><span class="muted">-</span></td>
+          <td class="duration"><span class="muted">-</span></td>
+          <td><span class="badge badge-skip">Skipped</span></td>
+          <td class="media"><span class="muted">-</span></td>
+        </tr>
+        <tr class="row-skipped">
+          <td class="num">#17</td>
+          <td>Submit One HAWB containing all weights and quantities with multiple Items and warehouses</td>
+          <td class="ref"><span class="muted">-</span></td>
+          <td class="ref"><span class="muted">-</span></td>
+          <td class="duration"><span class="muted">-</span></td>
+          <td><span class="badge badge-skip">Skipped</span></td>
+          <td class="media"><span class="muted">-</span></td>
+        </tr>
+        <tr class="row-failed">
+          <td class="num">#18</td>
+          <td>Create Multiple HAWB with multiple items and warehouses for each HAWB</td>
+          <td class="ref">20260930480342</td>
+          <td class="ref">SAU20260930366055</td>
+          <td class="duration">4m 41s</td>
+          <td><span class="badge badge-fail">Failed</span></td>
+          <td class="media"><a href="fasah-ffw-2026-09-30_files/4-screenshot.png" target="_blank">Screenshot</a></td>
+        </tr>
+        <tr class="row-failed">
+          <td class="num">#19</td>
+          <td>View Multiple HAWB with multiple items and warehouses for each HAWB</td>
+          <td class="ref">20260930480342</td>
+          <td class="ref">SAU20260930366055</td>
+          <td class="duration">4m 41s</td>
+          <td><span class="badge badge-fail">Failed</span></td>
+          <td class="media"><a href="fasah-ffw-2026-09-30_files/4-screenshot.png" target="_blank">Screenshot</a></td>
+        </tr>
+        <tr class="row-failed">
+          <td class="num">#20</td>
+          <td>Edit Multiple HAWB with multiple items and warehouses for each HAWB</td>
+          <td class="ref">20260930480342</td>
+          <td class="ref">SAU20260930366055</td>
+          <td class="duration">4m 41s</td>
+          <td><span class="badge badge-fail">Failed</span></td>
+          <td class="media"><a href="fasah-ffw-2026-09-30_files/4-screenshot.png" target="_blank">Screenshot</a></td>
+        </tr>
+        <tr class="row-failed">
+          <td class="num">#21</td>
+          <td>Submit Multiple HAWB with multiple items and warehouses for each HAWB</td>
+          <td class="ref">20260930480342</td>
+          <td class="ref">SAU20260930366055</td>
+          <td class="duration">4m 41s</td>
+          <td><span class="badge badge-fail">Failed</span></td>
+          <td class="media"><a href="fasah-ffw-2026-09-30_files/4-screenshot.png" target="_blank">Screenshot</a></td>
+        </tr>
+        <tr class="row-skipped">
+          <td class="num">#22</td>
+          <td>Create DEO with valid importer</td>
+          <td class="ref"><span class="muted">-</span></td>
+          <td class="ref"><span class="muted">-</span></td>
+          <td class="duration"><span class="muted">-</span></td>
+          <td><span class="badge badge-skip">Skipped</span></td>
+          <td class="media"><span class="muted">-</span></td>
+        </tr>
+        <tr class="row-skipped">
+          <td class="num">#23</td>
+          <td>View DEO with valid importer</td>
+          <td class="ref"><span class="muted">-</span></td>
+          <td class="ref"><span class="muted">-</span></td>
+          <td class="duration"><span class="muted">-</span></td>
+          <td><span class="badge badge-skip">Skipped</span></td>
+          <td class="media"><span class="muted">-</span></td>
+        </tr>
+        <tr class="row-skipped">
+          <td class="num">#24</td>
+          <td>Edit  DEO with valid importer</td>
+          <td class="ref"><span class="muted">-</span></td>
+          <td class="ref"><span class="muted">-</span></td>
+          <td class="duration"><span class="muted">-</span></td>
+          <td><span class="badge badge-skip">Skipped</span></td>
+          <td class="media"><span class="muted">-</span></td>
+        </tr>
+        <tr class="row-skipped">
+          <td class="num">#25</td>
+          <td>Submit DEO with valid importer</td>
+          <td class="ref"><span class="muted">-</span></td>
+          <td class="ref"><span class="muted">-</span></td>
+          <td class="duration"><span class="muted">-</span></td>
+          <td><span class="badge badge-skip">Skipped</span></td>
+          <td class="media"><span class="muted">-</span></td>
+        </tr>
+        <tr class="row-skipped">
+          <td class="num">#26</td>
+          <td>Submit DEO with invalid importer</td>
+          <td class="ref"><span class="muted">-</span></td>
+          <td class="ref"><span class="muted">-</span></td>
+          <td class="duration"><span class="muted">-</span></td>
+          <td><span class="badge badge-skip">Skipped</span></td>
+          <td class="media"><span class="muted">-</span></td>
+        </tr>
+        <tr class="row-skipped">
+          <td class="num">#27</td>
+          <td>Submit DEO without importer</td>
+          <td class="ref"><span class="muted">-</span></td>
+          <td class="ref"><span class="muted">-</span></td>
+          <td class="duration"><span class="muted">-</span></td>
+          <td><span class="badge badge-skip">Skipped</span></td>
+          <td class="media"><span class="muted">-</span></td>
+        </tr></tbody>
+      </table>
+  
+</body>
+</html>

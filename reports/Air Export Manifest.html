@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Fasah Test Case Report</title>
+<style>
+  body { font-family: -apple-system, Segoe UI, Arial, sans-serif; margin: 0; padding: 24px; background: #f7f7f8; color: #1a1a1a; }
+  h1 { margin: 0 0 4px; }
+  .meta { color: #666; font-size: 13px; margin-bottom: 20px; }
+  .summary { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+  .stat { background: #fff; border: 1px solid #e2e2e2; border-radius: 8px; padding: 10px 16px; min-width: 110px; }
+  .stat .n { font-size: 22px; font-weight: 700; }
+  .stat .l { font-size: 12px; color: #666; }
+  h2 { margin-top: 32px; border-bottom: 2px solid #e2e2e2; padding-bottom: 6px; }
+  table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,.05); }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #eee; font-size: 13px; vertical-align: top; }
+  th { background: #fafafa; font-weight: 600; color: #444; }
+  td.num { font-weight: 700; white-space: nowrap; }
+  td.test-title { color: #333; }
+  td.ref { color: #333; white-space: nowrap; font-size: 12px; }
+  td.duration { color: #666; white-space: nowrap; font-size: 12px; }
+  .muted { color: #bbb; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+  .badge-pass { background: #e3f9e5; color: #1e7d2b; }
+  .badge-fail { background: #fde8e8; color: #c81e1e; }
+  .badge-flaky { background: #fff4e0; color: #a5690a; }
+  .badge-skip { background: #eef0f2; color: #666; }
+  .badge-none { background: #f3f3f3; color: #999; }
+  tr.row-failed { background: #fffafa; }
+</style>
+</head>
+<body>
+  <h1>Fasah Test Case Report</h1>
+  <div class="meta">Generated 2026-09-26T12:54:52.873Z from: test-results/export-manifest-ecl-results.json</div>
+  <div class="summary">
+    <div class="stat"><div class="n">23m 38s</div><div class="l">Total duration</div></div>
+    <div class="stat"><div class="n">18</div><div class="l">Passed</div></div>
+    <div class="stat"><div class="n">0</div><div class="l">Failed</div></div>
+    <div class="stat"><div class="n">0</div><div class="l">Flaky</div></div>
+    <div class="stat"><div class="n">0</div><div class="l">Skipped</div></div>
+    <div class="stat"><div class="n">0</div><div class="l">Not automated</div></div>
+  </div>
+  
+      <h2>Air Export Manifest</h2>
+      <table>
+        <thead><tr><th>#</th><th>Scenario</th><th>Reference #</th><th>Message ID</th><th>Duration</th><th>Status</th></tr></thead>
+        <tbody>
+        <tr class="row-passed">
+          <td class="num">#1</td>
+          <td>Save Export Manifest with header only as Draft</td>
+          <td class="ref">20260926480910</td>
+          <td class="ref"><span class="muted">-</span></td>
+          <td class="duration">17.1s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#2</td>
+          <td>View Export Manifest with header</td>
+          <td class="ref">20260926480910</td>
+          <td class="ref"><span class="muted">-</span></td>
+          <td class="duration">9.8s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#3</td>
+          <td>Edit Export Manifest with header</td>
+          <td class="ref">20260926480910</td>
+          <td class="ref"><span class="muted">-</span></td>
+          <td class="duration">6.8s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#4</td>
+          <td>Submit Export Manifest with header</td>
+          <td class="ref">20260926480910</td>
+          <td class="ref"><span class="muted">-</span></td>
+          <td class="duration">135ms</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#5</td>
+          <td>Submit Export Manifest with one Export Bill</td>
+          <td class="ref">20260926480909</td>
+          <td class="ref">SAU20260926362117</td>
+          <td class="duration">34.7s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#6</td>
+          <td>Save Export Manifest with multiple Export Bills</td>
+          <td class="ref">20260926480908</td>
+          <td class="ref">SAU20260926362118</td>
+          <td class="duration">13.7s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#7</td>
+          <td>View Export Manifest with multiple Export Bills</td>
+          <td class="ref">20260926480908</td>
+          <td class="ref">SAU20260926362118</td>
+          <td class="duration">9.6s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#8</td>
+          <td>Edit Export Manifest with multiple Export Bills</td>
+          <td class="ref">20260926480908</td>
+          <td class="ref">SAU20260926362118</td>
+          <td class="duration">9.9s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#9</td>
+          <td>Submit Export Manifest with multiple Export Bills</td>
+          <td class="ref">20260926480908</td>
+          <td class="ref">SAU20260926362118</td>
+          <td class="duration">38.5s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#10</td>
+          <td>Submit Air Export Manifest ECL with change in header</td>
+          <td class="ref">20260926480925</td>
+          <td class="ref">SAU20260926362102</td>
+          <td class="duration">3m 18s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#11</td>
+          <td>Submit Air Export Manifest ECL with Editing existing Bill</td>
+          <td class="ref">20260926480923</td>
+          <td class="ref">SAU20260926362104</td>
+          <td class="duration">4m 10s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#12</td>
+          <td>Submit Air Export Manifest ECL with Deleted Existing Bill</td>
+          <td class="ref">20260926480921</td>
+          <td class="ref">SAU20260926362106</td>
+          <td class="duration">3m 60s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#13</td>
+          <td>Submit Air Export Manifest ECL with Added Export Bill</td>
+          <td class="ref">20260926480918</td>
+          <td class="ref">SAU20260926362109</td>
+          <td class="duration">2m 49s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#14</td>
+          <td>Add Bills to Waiting Manifest</td>
+          <td class="ref">20260926480915</td>
+          <td class="ref"><span class="muted">-</span></td>
+          <td class="duration">3m 7s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#15</td>
+          <td>Create Air Export Manifest ECL with Edit Header Update, Export Bill Add/Update/Delete</td>
+          <td class="ref">20260926480913</td>
+          <td class="ref">SAU20260926362114</td>
+          <td class="duration">576ms</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#16</td>
+          <td>View Air Export Manifest ECL with Header Update, Export Bill Add/Update/Delete</td>
+          <td class="ref">20260926480913</td>
+          <td class="ref">SAU20260926362114</td>
+          <td class="duration">12.4s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#17</td>
+          <td>Edit Air Export Manifest ECL with Header Update, Export Bill Add/Update/Delete</td>
+          <td class="ref">20260926480913</td>
+          <td class="ref">SAU20260926362114</td>
+          <td class="duration">3m 55s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+        </tr>
+        <tr class="row-passed">
+          <td class="num">#18</td>
+          <td>Submit Air Export Manifest ECL withHeader Update, Export Bill Add/Update/Delete</td>
+          <td class="ref">20260926480913</td>
+          <td class="ref">SAU20260926362114</td>
+          <td class="duration">10.1s</td>
+          <td><span class="badge badge-pass">Passed</span></td>
+        </tr></tbody>
+      </table>
+  
+</body>
+</html>
